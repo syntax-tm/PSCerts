@@ -103,7 +103,7 @@ PrivateData = @{
         ProjectUri = 'https://github.com/syntax-tm/PSCerts'
 
         # A URL to an icon representing this module.
-        IconUri = 'https://github.com/syntax-tm/PSCerts/raw/main/images/PSCerts.ico'
+        IconUri = 'https://github.com/syntax-tm/PSCerts/raw/master/images/PSCerts.ico'
 
         # ReleaseNotes of this module
         # ReleaseNotes = ''
