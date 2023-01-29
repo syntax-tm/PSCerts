@@ -1,47 +1,26 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Security.AccessControl;
 using System.Security.Cryptography.X509Certificates;
+using System.Security.Principal;
 
 namespace PSCerts
 {
-    [Cmdlet(VerbsCommon.Get, "CertPermissions", DefaultParameterSetName = PROPS_PARAM_SET)]
-    [OutputType(typeof(FileSecurity))]
-    public class AddCertPermissionsCommand : PSCmdlet
+    [Cmdlet(VerbsCommon.Get, "CertPermissions")]
+    [OutputType(typeof(AuthorizationRuleCollection))]
+    public class GetCertPermissionsCommand : PSCmdlet
     {
-        private const string PROPS_PARAM_SET = nameof(PROPS_PARAM_SET);
-        private const string PROPS_DENY_PARAM_SET = nameof(PROPS_DENY_PARAM_SET);
-        private const string ACCESS_RULE_PARAM_SET = nameof(ACCESS_RULE_PARAM_SET);
-        
-        [Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true,
-                   ValueFromPipelineByPropertyName = true, ParameterSetName = PROPS_PARAM_SET)]
-        [Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true,
-                   ValueFromPipelineByPropertyName = true, ParameterSetName = PROPS_DENY_PARAM_SET)]
-        [Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true,
-                   ValueFromPipelineByPropertyName = true, ParameterSetName = ACCESS_RULE_PARAM_SET)]
+        [Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true, ValueFromPipelineByPropertyName = true)]
         public X509Certificate2 Certificate { get; set; }
         
-        [Parameter(Mandatory = true, Position = 1, ParameterSetName = ACCESS_RULE_PARAM_SET)]
-        public FileSystemAccessRule FileSystemAccessRule { get; set; }
-        
-        [Parameter(Mandatory = true, Position = 1, ParameterSetName = PROPS_PARAM_SET)]
-        [Parameter(Mandatory = true, Position = 1, ParameterSetName = PROPS_DENY_PARAM_SET)]
-        [Alias("Account","Name","User","UserName")]
-        public string Identity { get; set; }
-        
-        [Parameter(Mandatory = true, Position = 2, ParameterSetName = PROPS_PARAM_SET)]
-        [Parameter(Mandatory = true, Position = 2, ParameterSetName = PROPS_DENY_PARAM_SET)]
-        [Alias("Rights","Permissions")]
-        public FileSystemRights FileSystemRights { get; set; }
-        
-        [Parameter(Mandatory = true, Position = 3, ParameterSetName = PROPS_PARAM_SET)]
-        [Alias("Access")]
-        public AccessControlType AccessType { get; set; } = AccessControlType.Allow;
-        
-        [Parameter(Position = 3, ParameterSetName = PROPS_DENY_PARAM_SET)]
-        public SwitchParameter Deny { get; set; }
+        [Parameter]
+        public SwitchParameter Explicit { get; set; }
+
+        [Parameter]
+        public SwitchParameter Inherited { get; set; }
 
         protected override void ProcessRecord()
         {
@@ -49,17 +28,9 @@ namespace PSCerts
             var privateKeyInfo = new FileInfo(privateKeyFile);
             var acl = privateKeyInfo.GetAccessControl();
 
-            var rule = ParameterSetName switch
-            {
-                PROPS_PARAM_SET       => new (Identity, FileSystemRights, AccessType),
-                PROPS_DENY_PARAM_SET  => new (Identity, FileSystemRights, AccessControlType.Deny),
-                ACCESS_RULE_PARAM_SET => FileSystemAccessRule,
-                _                     => throw new ArgumentException($"Unknown {nameof(ParameterSetName)} {ParameterSetName}.")
-            };
-
-            acl.AddAccessRule(rule);
+            var rules = acl.GetAccessRules(Explicit.IsPresent, Inherited.IsPresent, typeof(NTAccount));
             
-            WriteObject(acl);
+            WriteObject(rules, false);
         }
     }
 }
