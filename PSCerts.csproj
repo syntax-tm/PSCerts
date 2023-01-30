@@ -3,7 +3,7 @@
   <PropertyGroup>
     <AssemblyName>PSCerts</AssemblyName>
     <LangVersion>preview</LangVersion>
-    <TargetFramework>net48</TargetFramework>
+    <TargetFramework>net7.0-windows</TargetFramework>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     <Title>PSCerts</Title>

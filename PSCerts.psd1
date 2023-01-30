@@ -12,7 +12,7 @@
 RootModule = 'PSCerts.dll'
 
 # Version number of this module.
-ModuleVersion = '0.0.1'
+ModuleVersion = '0.0.2'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -48,12 +48,7 @@ Description = 'Powershell module for managing certificates'
 # RequiredModules = @()
 
 # Assemblies that must be loaded prior to importing this module
-RequiredAssemblies = @(
-    'System.IO.FileSystem.AccessControl.dll',
-    'System.Security.AccessControl.dll',
-    'System.Security.Cryptography.Cng.dll',
-    'System.Security.Principal.Windows.dll'
-)
+# RequiredAssemblies = @()
 
 # Script files (.ps1) that are run in the caller's environment prior to importing this module.
 # ScriptsToProcess = @()

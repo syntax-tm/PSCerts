@@ -6,29 +6,21 @@ $modulePath = Join-Path $outputDir 'PSCerts.psd1'
 
 $ErrorActionPreference = 'Stop'
 
-dotnet build -v m --sc true
+dotnet build --sc true
 
 if ($LASTEXITCODE -ne 0) {
 
-	Write-Host @"
-
-If the file is in use by another process, make sure you removed the module if it was imported using:
-
-Remove-Module -Name PSCerts
-
-"@ -ForegroundColor Yellow
+	Write-Host "If you previously ran `"" -ForegroundColor Yellow
+	Write-Host "Import-Module" -ForegroundColor Cyan
+	Write-Host "`" and the error message indicates that the 'file is in use by another process', you need to remove the module."  -ForegroundColor Yellow
+	Write-Host "`nRemove-Module PSCerts" -ForegroundColor Cyan
+	Write-Host "`nAlternatively, you can terminate the process indicated that is locking the file." -ForegroundColor Yellow
+	Write-Host ""
 
 	return
 }
 
-$message = @"
-
-PSCerts module build succeeded.
-
-For testing, the module can be imported using the .psd1 file contained in the build directory. For example:
-
-Import-Module "$modulePath"
-
-"@
-
-Write-Host $message -ForegroundColor Green
+Write-Host "`n$projectFile build succeeded." -ForegroundColor Green
+Write-Host "`nFor testing, the module can be imported using the .psd1 file contained in the build directory."
+Write-Host "`nImport-Module `"$assemblyPath`"" -ForegroundColor Cyan
+Write-Host ""

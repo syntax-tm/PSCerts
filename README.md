@@ -12,7 +12,7 @@ To build `PSCerts`, use the `build.ps1` script in the root directory.
 
 ## Test
 
-After building the assembly (`PSCerts.dll`), the module can be imported using the module manifest.
+After building, the module can be imported using the module manifest.
 
 ```powershell
 Import-Module .\bin\Debug\PSCerts.psd1
