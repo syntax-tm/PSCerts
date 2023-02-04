@@ -1,0 +1,22 @@
+
+# All files
+[*]
+indent_style = space
+
+# C# files
+[*.cs]
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+# Powershell files
+[*.ps1]
+indent_style = space
+indent_size = 4
+
+# Json files
+[*.json]
+indent_size = 2
+
+# Xml files
+[*.xml]
+indent_size = 2

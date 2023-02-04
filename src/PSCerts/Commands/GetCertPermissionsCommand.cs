@@ -6,8 +6,9 @@ using System.Management.Automation.Runspaces;
 using System.Security.AccessControl;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
+using PSCerts.Util;
 
-namespace PSCerts
+namespace PSCerts.Commands
 {
     [Cmdlet(VerbsCommon.Get, "CertPermissions")]
     [OutputType(typeof(AuthorizationRuleCollection))]
@@ -17,20 +18,25 @@ namespace PSCerts
         public X509Certificate2 Certificate { get; set; }
         
         [Parameter]
-        public SwitchParameter Explicit { get; set; }
-
-        [Parameter]
         public SwitchParameter Inherited { get; set; }
 
         protected override void ProcessRecord()
         {
-            var privateKeyFile = PrivateKeyHelper.GetPrivateKey(Certificate);
-            var privateKeyInfo = new FileInfo(privateKeyFile);
-            var acl = privateKeyInfo.GetAccessControl();
+            try
+            {
+                var privateKeyFile = PrivateKeyHelper.GetPrivateKey(Certificate);
+                var privateKeyInfo = new FileInfo(privateKeyFile);
+                var acl = privateKeyInfo.GetAccessControl();
 
-            var rules = acl.GetAccessRules(Explicit.IsPresent, Inherited.IsPresent, typeof(NTAccount));
+                var rules = acl.GetAccessRules(true, Inherited.IsPresent, typeof(NTAccount));
             
-            WriteObject(rules, false);
+                WriteObject(rules, false);
+            }
+            catch (Exception e)
+            {
+                var error = ErrorHelper.CreateError(e);
+                ThrowTerminatingError(error);
+            }
         }
     }
 }

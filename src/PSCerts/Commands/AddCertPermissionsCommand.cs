@@ -1,11 +1,13 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Security.AccessControl;
 using System.Security.Cryptography.X509Certificates;
+using PSCerts.Util;
 
-namespace PSCerts
+namespace PSCerts.Commands
 {
     [Cmdlet(VerbsCommon.Add, "CertPermissions", DefaultParameterSetName = PROPS_PARAM_SET)]
     [OutputType(typeof(FileSecurity))]
@@ -45,21 +47,29 @@ namespace PSCerts
 
         protected override void ProcessRecord()
         {
-            var privateKeyFile = PrivateKeyHelper.GetPrivateKey(Certificate);
-            var privateKeyInfo = new FileInfo(privateKeyFile);
-            var acl = privateKeyInfo.GetAccessControl();
-
-            var rule = ParameterSetName switch
+            try
             {
-                PROPS_PARAM_SET       => new (Identity, FileSystemRights, AccessType),
-                PROPS_DENY_PARAM_SET  => new (Identity, FileSystemRights, AccessControlType.Deny),
-                ACCESS_RULE_PARAM_SET => FileSystemAccessRule,
-                _                     => throw new ArgumentException($"Unknown {nameof(ParameterSetName)} {ParameterSetName}.")
-            };
+                var privateKeyFile = PrivateKeyHelper.GetPrivateKey(Certificate);
+                var privateKeyInfo = new FileInfo(privateKeyFile);
+                var acl = privateKeyInfo.GetAccessControl();
 
-            acl.AddAccessRule(rule);
+                var rule = ParameterSetName switch
+                {
+                    PROPS_PARAM_SET       => new (Identity, FileSystemRights, AccessType),
+                    PROPS_DENY_PARAM_SET  => new (Identity, FileSystemRights, AccessControlType.Deny),
+                    ACCESS_RULE_PARAM_SET => FileSystemAccessRule,
+                    _                     => throw new ArgumentException($"Unknown {nameof(ParameterSetName)} {ParameterSetName}.")
+                };
+
+                acl.AddAccessRule(rule);
             
-            WriteObject(acl);
+                WriteObject(acl);
+            }
+            catch (Exception e)
+            {
+                var error = ErrorHelper.CreateError(e);
+                ThrowTerminatingError(error);
+            }
         }
     }
 }

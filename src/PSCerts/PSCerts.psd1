@@ -12,7 +12,7 @@
 RootModule = 'PSCerts.dll'
 
 # Version number of this module.
-ModuleVersion = '0.0.2'
+ModuleVersion = '0.0.4'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -66,7 +66,7 @@ Description = 'Powershell module for managing certificates'
 FunctionsToExport = @()
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
-CmdletsToExport = @('Find-CertPrivateKey','Add-CertPermissions','Get-CertPermissions')
+CmdletsToExport = @('Add-CertPermissions','Get-CertPermissions', 'Get-CertPrivateKey', 'Get-CertSummary')
 
 # Variables to export from this module
 VariablesToExport = '*'
@@ -81,7 +81,9 @@ AliasesToExport = @()
 # ModuleList = @()
 
 # List of all files packaged with this module
-# FileList = @()
+FileList = @(
+    'PSCerts.deps.json'
+)
 
 # Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.
 PrivateData = @{
@@ -89,7 +91,9 @@ PrivateData = @{
     PSData = @{
 
         # Tags applied to this module. These help with module discovery in online galleries.
-        Tags = @('Cert','Key','RSA')
+        Tags = @('Certificates','Key','RSA','PSEdition_Desktop','PSEdition_Core','SSL','PFX')
+
+        # 'Windows','Linux','MacOS'
 
         # A URL to the license for this module.
         # LicenseUri = ''

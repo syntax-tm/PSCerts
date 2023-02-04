@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
-namespace PSCerts
+namespace PSCerts.Util
 {
     public class PrivateKeyHelper
     {
@@ -36,16 +37,15 @@ namespace PSCerts
         {
             try
             {
-                var cert = GetCertificate(storeName, location, key, findType);                
-                var privateKeyFile = GetKeyFileName(cert);
-                return GetKeyFile(privateKeyFile);
+                var cert = GetCertificate(storeName, location, key, findType);
+                return GetPrivateKey(cert);
             }
             catch (Exception e)
             {
-                throw new Exception($"An error occurred attempting to find the private key for '{key}'. {e.Message}", e);
+                throw new InvalidOperationException($"An error occurred attempting to find the private key for '{key}'. {e.Message}", e);
             }
         }
-        
+
         public static string GetPrivateKey(X509Certificate2 cert)
         {
             try
@@ -55,7 +55,38 @@ namespace PSCerts
             }
             catch (Exception e)
             {
-                throw new Exception($"An error occurred attempting to find the private key. {e.Message}", e);
+                throw new InvalidOperationException($"An error occurred attempting to find the private key. {e.Message}", e);
+            }
+        }
+        
+        public static bool TryGetPrivateKey(StoreLocation location, StoreName storeName, string key, X509FindType findType, out string filePath)
+        {
+            filePath = null;
+
+            try
+            {
+                var cert = GetCertificate(storeName, location, key, findType);
+                return TryGetPrivateKey(cert, out filePath);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public static bool TryGetPrivateKey(X509Certificate2 cert, out string filePath)
+        {
+            filePath = null;
+
+            try
+            {
+                var privateKeyFile = GetKeyFileName(cert);
+                filePath = GetKeyFile(privateKeyFile);
+                return true;
+            }
+            catch
+            {
+                return false;
             }
         }
 
@@ -84,56 +115,76 @@ namespace PSCerts
 
             return result;
         }
-
-        private static string GetKeyFileName(X509Certificate2 cert)
+        
+        public static string GetKeyFileName(X509Certificate2 cert)
         {
-            var hProvider = IntPtr.Zero; // CSP handle
-            var freeProvider  = false;   // Do we need to free the CSP ?
-            uint acquireFlags  = 0;
-            var _keyNumber = 0;
-            string keyFileName = null;
+            if (cert == null) throw new ArgumentNullException(nameof(cert));
+            
+            //if (typeof(T) == typeof(RSA))
+            //    return (T)(object)certificate.Pal.GetRSAPrivateKey();
 
-            // determine whether there is private key information available for this certificate in the key store
-            if (CryptAcquireCertificatePrivateKey(cert.Handle, acquireFlags, IntPtr.Zero, ref hProvider,
-                                                  ref _keyNumber, ref freeProvider))
+            //if (typeof(T) == typeof(ECDsa))
+            //    return (T)(object)certificate.Pal.GetECDsaPrivateKey();
+
+            //if (typeof(T) == typeof(DSA))
+            //    return (T)(object)certificate.Pal.GetDSAPrivateKey();
+
+            var algorithms = new List<Type>
             {
-                var pBytes  = IntPtr.Zero; // native Memory for the CRYPT_KEY_PROV_INFO structure
-                var cbBytes = 0;           // native Memory size
+                typeof(RSA),
+                typeof(ECDsa),
+                typeof(DSA)
+            };
 
+            foreach (var alg in algorithms)
+            {
                 try
                 {
-                    if (CryptGetProvParam(hProvider, CryptGetProvParamType.PP_UNIQUE_CONTAINER, IntPtr.Zero, ref cbBytes, 0))
+                    if (alg == typeof(RSA))
                     {
-                        pBytes = Marshal.AllocHGlobal(cbBytes);
+                        var rsaPk = cert.GetRSAPrivateKey();
 
-                        if (CryptGetProvParam(hProvider, CryptGetProvParamType.PP_UNIQUE_CONTAINER, pBytes, ref cbBytes, 0))
+                        if (rsaPk == null) continue;
+
+                        return rsaPk switch
                         {
-                            var keyFileBytes = new byte[cbBytes];
+                            RSACng rsaCngPk                 => rsaCngPk.Key.UniqueName,
+                            RSACryptoServiceProvider rsaCsp => rsaCsp.CspKeyContainerInfo.UniqueKeyContainerName,
+                            _                               => throw new NotSupportedException($"RSA private key type {rsaPk.KeyExchangeAlgorithm} is not currently supported.")
+                        };
+                    }
 
-                            Marshal.Copy(pBytes,keyFileBytes,0,cbBytes);
-
-                            // copy everything except tailing null byte
-                            keyFileName = System.Text.Encoding.ASCII.GetString(keyFileBytes, 0, keyFileBytes.Length - 1);
+                    if (alg == typeof(ECDsa))
+                    {
+                        var ecdPk = cert.GetECDsaPrivateKey();
+                        if (ecdPk is ECDsaCng ecdCng)
+                        {
+                            return ecdCng.Key.UniqueName;
                         }
                     }
-                }
-                finally
-                {
-                    if (freeProvider)
-                        CryptReleaseContext(hProvider, 0);
+                    
+#if NETSTANDARD2_0_OR_GREATER
+                    if (alg == typeof(DSA))
+                    {
+                        //var ecdPk = cert.GetDSAPrivateKey();
+                        //if (ecdPk is ECDsaCng ecdCng)
+                        //{
+                        //    return ecdCng.Key.UniqueName;
+                        //}
+                    }
+#endif
 
-                    // free native memory
-                    if (pBytes != IntPtr.Zero)
-                        Marshal.FreeHGlobal(pBytes);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    throw;
                 }
             }
-
-            if (keyFileName == null)
-                throw new InvalidOperationException("Unable to obtain private key file name");
-
-            return keyFileName;
+            
+            throw new InvalidOperationException($"A private key for the {nameof(X509Certificate)} was not found.");
         }
-
+        
         private static string GetKeyFile(string keyFileName)
         {
             if (string.IsNullOrWhiteSpace(keyFileName)) throw new ArgumentNullException(nameof(keyFileName));
@@ -156,7 +207,7 @@ namespace PSCerts
             var commonAppData = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
             var winDir = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
 
-            return new ()
+            return new()
             {
                 RSA_SCHANNEL_KEYS,
                 APPDATA_MS_CRYPTO_KEYS,
