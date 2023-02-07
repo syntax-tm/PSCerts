@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Management.Automation;
+using System.Management.Automation.Provider;
+using System.Management.Automation.Runspaces;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -119,21 +122,12 @@ namespace PSCerts.Util
         public static string GetKeyFileName(X509Certificate2 cert)
         {
             if (cert == null) throw new ArgumentNullException(nameof(cert));
-            
-            //if (typeof(T) == typeof(RSA))
-            //    return (T)(object)certificate.Pal.GetRSAPrivateKey();
-
-            //if (typeof(T) == typeof(ECDsa))
-            //    return (T)(object)certificate.Pal.GetECDsaPrivateKey();
-
-            //if (typeof(T) == typeof(DSA))
-            //    return (T)(object)certificate.Pal.GetDSAPrivateKey();
-
+    
             var algorithms = new List<Type>
             {
                 typeof(RSA),
                 typeof(ECDsa),
-                typeof(DSA)
+                //typeof(DSA)
             };
 
             foreach (var alg in algorithms)
@@ -163,22 +157,22 @@ namespace PSCerts.Util
                         }
                     }
                     
-#if NETSTANDARD2_0_OR_GREATER
-                    if (alg == typeof(DSA))
-                    {
-                        //var ecdPk = cert.GetDSAPrivateKey();
-                        //if (ecdPk is ECDsaCng ecdCng)
-                        //{
-                        //    return ecdCng.Key.UniqueName;
-                        //}
-                    }
-#endif
-
+                    // INFO: DSA not currently supported
+                    // if (alg == typeof(DSA))
+                    // {
+                    //     var ecdPk = cert.GetDSAPrivateKey();
+                    //     if (ecdPk is ECDsaCng ecdCng)
+                    //     {
+                    //         return ecdCng.Key.UniqueName;
+                    //     }
+                    // }
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e);
-                    throw;
+                    var message = $"Private {alg.Name} private key was not successful.";
+                    message += $"Details: {e.Message}";
+                    
+                    // TODO: Write to output from outside of the Cmdlet class
                 }
             }
             

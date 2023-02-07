@@ -1,5 +1,5 @@
 ﻿<p align="center">
-  <img src="images/PSCerts_header.png" />
+  <img src="images/PSCerts_header_color.png" />
 </p>
 
 <hr>
@@ -26,7 +26,7 @@ Install-Module -Name PSCerts
 
 ## Build
 
-To build **PSCerts** use the `build.ps1` script in the source directory (`src\Scripts`).
+To build **PSCerts** use the `build.ps1` script in the scripts directory (`src\scripts`).
 
 ```powershell
 .\build.ps1
@@ -34,10 +34,10 @@ To build **PSCerts** use the `build.ps1` script in the source directory (`src\Sc
 
 ## Test
 
-After building, the module can be imported using the module manifest.
+The `test.ps1` script in `src\scripts` will build, import, and run some of the cmdlets for quick testing.
 
 ```powershell
-Import-Module .\bin\Debug\PSCerts.psd1
+.\test.ps1
 ```
 
 ## Commands

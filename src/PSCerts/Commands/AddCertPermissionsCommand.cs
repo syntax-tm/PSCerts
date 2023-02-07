@@ -51,7 +51,7 @@ namespace PSCerts.Commands
             {
                 var privateKeyFile = PrivateKeyHelper.GetPrivateKey(Certificate);
                 var privateKeyInfo = new FileInfo(privateKeyFile);
-                var acl = privateKeyInfo.GetAccessControl();
+                var acl = privateKeyInfo.GetAccessControl(AccessControlSections.All);
 
                 var rule = ParameterSetName switch
                 {
@@ -62,6 +62,8 @@ namespace PSCerts.Commands
                 };
 
                 acl.AddAccessRule(rule);
+
+                privateKeyInfo.SetAccessControl(acl);
             
                 WriteObject(acl);
             }

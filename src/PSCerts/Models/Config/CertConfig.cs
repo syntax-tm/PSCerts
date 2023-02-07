@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
 using Newtonsoft.Json;
 using PSCerts.Util;
 
@@ -8,6 +11,8 @@ namespace PSCerts.Config
     {
         [JsonProperty("cert", Required = Required.Always)]
         public string CertFile { get; set; }
+
+        public string CertFileName => Path.GetFileName(CertFile);
 
         [JsonProperty("password")]
         public CertPassword Password { get; set; } = null;
@@ -22,10 +27,12 @@ namespace PSCerts.Config
         public List<CertPermissions> Permissions { get; set; } = new();
 
         public bool HasPassword => Password != null;
-
+        
         [JsonConstructor]
         public CertConfig(string certFile)
         {
+            if (string.IsNullOrWhiteSpace(certFile)) throw new ArgumentNullException(nameof(certFile));
+
             var path = FileSystemHelper.ResolvePath(certFile);
             CertFile = path.FullName;
         }

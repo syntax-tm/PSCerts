@@ -1,0 +1,11 @@
+{
+    "build": {
+        "configuration": "Release",
+        "framework": "netstandard2.0",
+        "selfContained": false
+    },
+    "test": {
+        "terminal": "powershell",
+        "testPath": "test"
+    }
+}

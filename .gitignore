@@ -179,6 +179,9 @@ DocProject/Help/html
 # Click-Once directory
 publish/
 
+# Test directory
+test/
+
 # Publish Web Output
 *.[Pp]ublish.xml
 *.azurePubxml
@@ -395,3 +398,6 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+# Live unit testing
+**/*.lutconfig

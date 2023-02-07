@@ -5,8 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using PSCerts.Config;
 
-namespace PSCerts.Config
+namespace PSCerts.Managers
 {
     public static class CertConfigFactory
     {
