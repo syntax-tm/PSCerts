@@ -10,29 +10,63 @@ using System.Security.AccessControl;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
+using PSCerts.Config;
+using PSCerts.Summary;
 using PSCerts.Util;
 
 namespace PSCerts.Commands
 {
-    [Cmdlet(VerbsCommon.Get, "CertSummary")]
-    [OutputType(typeof(List<CertSummary>))]
+    [Cmdlet(VerbsCommon.Get, "CertSummary", DefaultParameterSetName = DEFAULT_PARAM_SET)]
+    [OutputType(typeof(List<CertSummaryItem>))]
+    //[OutputType(typeof(List<CertSummary>))]
     public class GetCertSummaryCommand : PSCmdlet
     {
-        [Parameter(Position = 0, ValueFromPipeline = true, ValueFromPipelineByPropertyName = true)]
-        public StoreLocation? StoreLocation { get; set; }
+        private const string DEFAULT_PARAM_SET = nameof(DEFAULT_PARAM_SET);
+        private const string CUSTOM_PARAM_SET = nameof(CUSTOM_PARAM_SET);
+        private const string DETAILED_RULE_PARAM_SET = nameof(DETAILED_RULE_PARAM_SET);
+
+        [Parameter(Position = 0)]
+        public StoreLocation? Location { get; set; }
+
+        [Parameter(Position = 1, ParameterSetName = CUSTOM_PARAM_SET)]
+        public StoreName[] Stores { get; set; }
+
+        [Parameter(ParameterSetName = DETAILED_RULE_PARAM_SET)]
+        public SwitchParameter Detailed { get; set; }
         
+        [Parameter]
+        public SwitchParameter HasPrivateKey { get; set; }
+
         protected override void ProcessRecord()
         {
             try
             {
-                var certs = new List<CertSummary>();
+                var certs = new List<CertSummaryItem>();
+                var pkOnly = HasPrivateKey.IsPresent;
 
-                var locations = StoreLocation.HasValue
-                    ? new List<StoreLocation> { StoreLocation.Value }
-                    : Enum.GetValues(typeof(StoreLocation)).Cast<StoreLocation>();
+                List<StoreName> stores;
+                List<StoreLocation> locations = Location.HasValue
+                    ? new () { Location.Value }
+                    : new () { StoreLocation.CurrentUser, StoreLocation.LocalMachine };
 
+                if (Detailed.IsPresent)
+                {
+                    stores = Enum.GetValues(typeof(StoreName)).AsList<StoreName>();
+                }
+                else if (Stores?.Any() ?? false)
+                {
+                    stores = new (Stores);
+                }
+                else
+                {
+                    stores = new ()
+                    {
+                        StoreName.My
+                    };
+                }
+                
                 foreach (var location in locations)
-                foreach (var storeName in Enum.GetValues(typeof(StoreName)).Cast<StoreName>())
+                foreach (var storeName in stores)
                 {
                     var store = new X509Store(storeName, location);
 
@@ -42,16 +76,32 @@ namespace PSCerts.Commands
 
                         foreach (var cert in store.Certificates)
                         {
-                            var summary = new CertSummary(store, cert);
+                            var summary = new CertSummaryItem(store, cert);
 
-                            if (PrivateKeyHelper.TryGetPrivateKey(cert, out var pkFilePath))
+                            if (PrivateKeyHelper.TryGetPrivateKey(cert, out var privateKeyFile))
                             {
-                                var pkFi = new FileInfo(pkFilePath);
-                                var acl = pkFi.GetAccessControl(AccessControlSections.All);
-                                var rules = acl.GetAccessRules(true, true, typeof(NTAccount));
+                                
+                                var privateKeyInfo = new FileInfo(privateKeyFile);
+#if NETFRAMEWORK
+                                var acl = File.GetAccessControl(privateKeyFile);
+#else
+                                var acl = privateKeyInfo.GetAccessControl(AccessControlSections.All);
+#endif
 
-                                summary.PrivateKey = new (pkFilePath);
-                                summary.Permissions = rules.AsList<AuthorizationRule>();
+                                var rules = acl.GetAccessRules(true, true, typeof(SecurityIdentifier));
+
+                                summary.PrivateKey = privateKeyInfo;
+                                
+                                var perms = rules
+                                    .AsList<FileSystemAccessRule>()
+                                    .Select(r => new CertAccessRule(r))
+                                    .ToList();
+
+                                summary.Permissions = perms;
+                            }
+                            else if (pkOnly)
+                            {
+                                continue;
                             }
 
                             certs.Add(summary);
@@ -63,7 +113,7 @@ namespace PSCerts.Commands
                     }
                 }
 
-                WriteObject(certs, false);
+                WriteObject(certs, true);
             }
             catch (Exception e)
             {

@@ -1,5 +1,5 @@
 ﻿<p align="center">
-  <img src="images/PSCerts_header.png" />
+  <img src="images/PSCerts_header_color.png" />
 </p>
 
 <hr>

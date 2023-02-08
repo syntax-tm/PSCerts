@@ -15,7 +15,7 @@ namespace PSCerts.Tests
         protected const string THUMBPRINT = @"10df834fc47ddfc4d069d2e4fe79e4bf1d6d4dae";
         
         protected static string BasePath => Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-        protected static string CertPath => Path.Join(BasePath, CERT_REL_PATH);
+        protected static string CertPath => Path.Combine(BasePath, CERT_REL_PATH);
         
         protected readonly List<X509Certificate2> Certs = new ();
 
@@ -28,7 +28,7 @@ namespace PSCerts.Tests
             store.Open(OpenFlags.ReadOnly);
 
             var matches = store.Certificates.Find(X509FindType.FindByThumbprint, THUMBPRINT, false);
-            Certs.AddRange(matches);
+            Certs.AddRange(matches.Cast<X509Certificate2>());
         }
 
         [TearDown]
@@ -46,7 +46,7 @@ namespace PSCerts.Tests
             store.Close();
         }
         
-        private void ImportTestCert()
+        private static void ImportTestCert()
         {
             var store = new X509Store(StoreName.My, StoreLocation.LocalMachine);
             store.Open(OpenFlags.ReadWrite);

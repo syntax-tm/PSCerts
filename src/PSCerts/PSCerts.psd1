@@ -9,10 +9,17 @@
 @{
 
 # Script module or binary module file associated with this manifest.
-RootModule = 'PSCerts.dll'
+RootModule = if ($PSEdition -eq 'Core')
+{
+    'coreclr\PSCerts.dll'
+}
+else # Desktop
+{
+    'clr\PSCerts.dll'
+}
 
 # Version number of this module.
-ModuleVersion = '0.0.4'
+ModuleVersion = '0.0.8'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -36,7 +43,7 @@ Description = 'Powershell module for managing certificates'
 # PowerShellHostVersion = ''
 
 # Minimum version of Microsoft .NET Framework required by this module. This prerequisite is valid for the PowerShell Desktop edition only.
-# DotNetFrameworkVersion = ''
+DotNetFrameworkVersion = '4.7.2'
 
 # Minimum version of the common language runtime (CLR) required by this module. This prerequisite is valid for the PowerShell Desktop edition only.
 # ClrVersion = ''
@@ -48,7 +55,37 @@ Description = 'Powershell module for managing certificates'
 # RequiredModules = @()
 
 # Assemblies that must be loaded prior to importing this module
-# RequiredAssemblies = @()
+RequiredAssemblies = if($PSEdition -eq 'Core')
+{
+    'coreclr\Newtonsoft.Json.dll',
+    'coreclr\JsonSubTypes.dll',
+    'coreclr\Microsoft.Web.Administration.dll',
+    'coreclr\System.Buffers.dll',
+    'coreclr\System.Memory.dll',
+    'coreclr\System.Numerics.Vectors.dll',
+    'coreclr\System.Threading.dll',
+    'coreclr\System.Runtime.CompilerServices.Unsafe.dll',
+    'coreclr\System.Security.Cryptography.Cng.dll',
+    'coreclr\System.Security.Principal.Windows.dll',
+    'coreclr\System.Reflection.TypeExtensions.dll',
+    'coreclr\System.IO.FileSystem.Primitives.dll',
+    'coreclr\System.Security.AccessControl.dll',
+    'coreclr\System.IO.FileSystem.AccessControl.dll'
+}
+else # Desktop
+{
+    'clr\JsonSubTypes.dll',
+    'clr\Microsoft.Web.Administration.dll',
+    'clr\Microsoft.Win32.Registry.dll',
+    'clr\Newtonsoft.Json.dll',
+    'clr\System.Diagnostics.DiagnosticSource.dll',
+    'clr\System.IO.FileSystem.AccessControl.dll',
+    'clr\System.Reflection.TypeExtensions.dll',
+    'clr\System.Security.AccessControl.dll',
+    'clr\System.Security.Cryptography.Cng.dll',
+    'clr\System.Security.Principal.Windows.dll',
+    'clr\System.ServiceProcess.ServiceController.dll'
+}
 
 # Script files (.ps1) that are run in the caller's environment prior to importing this module.
 # ScriptsToProcess = @()
@@ -57,7 +94,9 @@ Description = 'Powershell module for managing certificates'
 # TypesToProcess = @()
 
 # Format files (.ps1xml) to be loaded when importing this module
-# FormatsToProcess = @()
+FormatsToProcess = @(
+    'PSCerts.format.ps1xml'
+)
 
 # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
 # NestedModules = @()
@@ -82,7 +121,7 @@ AliasesToExport = @()
 
 # List of all files packaged with this module
 FileList = @(
-    'PSCerts.deps.json'
+    'coreclr\PSCerts.deps.json'
 )
 
 # Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.

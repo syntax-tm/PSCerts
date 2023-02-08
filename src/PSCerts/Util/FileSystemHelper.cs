@@ -36,14 +36,14 @@ namespace PSCerts.Util
                 ? ResolveSymLink(path)
                 : path;
             
-            if (File.Exists(path))
+            if (File.Exists(resolvedPath))
             {
-                return new FileInfo(path);
+                return new FileInfo(resolvedPath);
             }
 
-            if (Directory.Exists(path))
+            if (Directory.Exists(resolvedPath))
             {
-                return new DirectoryInfo(path);
+                return new DirectoryInfo(resolvedPath);
             }
 
             throw new ArgumentException("Invalid path.", nameof(path));

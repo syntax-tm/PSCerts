@@ -1,0 +1,136 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Configuration>
+    <Controls>
+        <Control>
+            <Name>CertSummaryItem-Header</Name>
+            <CustomControl>
+                <CustomEntries>
+                    <CustomEntry>
+                        <CustomItem>
+                            <ExpressionBinding>
+                                <ScriptBlock>
+                                    "$($PSStyle.Formatting.TableHeader)$($PSStyle.Reverse)$($PSStyle.Bold)  $($_.Location.ToString())  $($PSStyle.Reset)"
+                                </ScriptBlock>
+                            </ExpressionBinding>
+                        </CustomItem>
+                    </CustomEntry>
+                </CustomEntries>
+            </CustomControl>
+        </Control>
+    </Controls>
+    <ViewDefinitions>
+        <View>
+            <Name>CertAccessRule</Name>
+            <ViewSelectedBy>
+                <TypeName>PSCerts.CertAccessRule</TypeName>
+            </ViewSelectedBy>
+            <TableControl>
+                <TableHeaders>
+                    <TableColumnHeader>
+                        <Label>Access</Label>
+                        <Alignment>Center</Alignment>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>FileSystemRights</Label>
+                        <Alignment>Center</Alignment>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>Identity</Label>
+                    </TableColumnHeader>
+                </TableHeaders>
+                <TableRowEntries>
+                    <TableRowEntry>
+                        <Wrap/>
+                        <TableColumnItems>
+                            <TableColumnItem>
+                                <ScriptBlock>
+                                    if ($_.AccessType -eq "Allow") { $color = $PSStyle.Foreground.Green }
+                                    else { $color = $PSStyle.Foreground.Red }
+
+                                    "$color$($_.AccessType)$($PSStyle.Reset)"
+                                </ScriptBlock>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <ScriptBlock>"$($PSStyle.Foreground.BrightCyan)$($_.FileSystemRights)$($PSStyle.Reset)"</ScriptBlock>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>Identity</PropertyName>
+                            </TableColumnItem>
+                        </TableColumnItems>
+                    </TableRowEntry>
+                </TableRowEntries>
+            </TableControl>
+        </View>
+        <View>
+            <Name>CertSummaryItem</Name>
+            <ViewSelectedBy>
+                <TypeName>PSCerts.Summary.CertSummaryItem</TypeName>
+            </ViewSelectedBy>
+            <GroupBy>
+                <PropertyName>Location</PropertyName>
+                <CustomControlName>CertSummaryItem-Header</CustomControlName>
+            </GroupBy>
+            <TableControl>
+                <TableHeaders>
+                    <TableColumnHeader>
+                        <Label>Store</Label>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>Thumbprint</Label>
+                        <Width>41</Width>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>Key</Label>
+                        <Alignment>Center</Alignment>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>Subject</Label>
+                        <Width>30</Width>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>Permissions</Label>
+                    </TableColumnHeader>
+                </TableHeaders>
+                <TableRowEntries>
+                    <TableRowEntry>
+                        <Wrap/>
+                        <TableColumnItems>
+                            <TableColumnItem>
+                                <ScriptBlock>[string]::Format("{0}\{1}", $_.Location, $_.Store)</ScriptBlock>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>Thumbprint</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <ScriptBlock>
+                                    if ($_.HasPrivateKey) { "$($PSStyle.Foreground.Green)Y$($PSStyle.Reset)" }
+                                    else { " " }
+                                </ScriptBlock>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <ScriptBlock>
+                                    if ($_.Subject.Length -ge 30) { "$($_.Subject.Substring(0, 27))..." }
+                                    else { "$($_.Subject)" }
+                                </ScriptBlock>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <ScriptBlock>
+                                    $output = @()
+                                    foreach ($perm in $_.Permissions)
+                                    {
+                                        $access = "[$($perm.AccessType.ToString())]"
+                                        if ($perm.AccessType -eq "Allow") { $color = $PSStyle.Foreground.Green }
+                                        else { $color = $PSStyle.Foreground.Red; $access += " " }
+
+                                        $output += "$color$access$($PSStyle.Reset) $($PSStyle.Foreground.BrightCyan){$($perm.FileSystemRights)}$($PSStyle.Reset) $($perm.Identity)"
+                                    }
+                                    [string]::Join("`n", $output)
+                                </ScriptBlock>
+                            </TableColumnItem>
+                        </TableColumnItems>
+                    </TableRowEntry>
+                </TableRowEntries>
+            </TableControl>
+        </View>
+    </ViewDefinitions>
+</Configuration>

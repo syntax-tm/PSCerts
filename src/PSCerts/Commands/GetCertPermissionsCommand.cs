@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Management.Automation;
@@ -11,26 +12,28 @@ using PSCerts.Util;
 namespace PSCerts.Commands
 {
     [Cmdlet(VerbsCommon.Get, "CertPermissions")]
-    [OutputType(typeof(AuthorizationRuleCollection))]
+    [OutputType(typeof(List<CertAccessRule>))]
     public class GetCertPermissionsCommand : PSCmdlet
     {
         [Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true, ValueFromPipelineByPropertyName = true)]
+        [Alias("Cert")]
         public X509Certificate2 Certificate { get; set; }
         
-        [Parameter]
-        public SwitchParameter Inherited { get; set; }
-
         protected override void ProcessRecord()
         {
             try
             {
                 var privateKeyFile = PrivateKeyHelper.GetPrivateKey(Certificate);
                 var privateKeyInfo = new FileInfo(privateKeyFile);
-                var acl = privateKeyInfo.GetAccessControl();
+                var acl = privateKeyInfo.GetAccessControl(AccessControlSections.All);
 
-                var rules = acl.GetAccessRules(true, Inherited.IsPresent, typeof(NTAccount));
+                var rules = acl.GetAccessRules(true, true, typeof(SecurityIdentifier));
+
+                var perms = rules.AsList<FileSystemAccessRule>()
+                    .Select(r => new CertAccessRule(r))
+                    .ToList();
             
-                WriteObject(rules, false);
+                WriteObject(perms, false);
             }
             catch (Exception e)
             {
