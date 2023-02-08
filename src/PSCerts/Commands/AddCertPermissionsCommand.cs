@@ -51,7 +51,12 @@ namespace PSCerts.Commands
             {
                 var privateKeyFile = PrivateKeyHelper.GetPrivateKey(Certificate);
                 var privateKeyInfo = new FileInfo(privateKeyFile);
+
+#if NETFRAMEWORK
+                var acl = File.GetAccessControl(privateKeyFile);
+#else
                 var acl = privateKeyInfo.GetAccessControl(AccessControlSections.All);
+#endif
 
                 var rule = ParameterSetName switch
                 {
@@ -63,8 +68,12 @@ namespace PSCerts.Commands
 
                 acl.AddAccessRule(rule);
 
+#if NETFRAMEWORK
+                File.SetAccessControl(privateKeyFile, acl);
+#else
                 privateKeyInfo.SetAccessControl(acl);
-            
+#endif
+
                 WriteObject(acl);
             }
             catch (Exception e)

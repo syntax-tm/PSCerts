@@ -25,7 +25,12 @@ namespace PSCerts.Commands
             {
                 var privateKeyFile = PrivateKeyHelper.GetPrivateKey(Certificate);
                 var privateKeyInfo = new FileInfo(privateKeyFile);
+
+#if NETFRAMEWORK
+                var acl = File.GetAccessControl(privateKeyFile);
+#else
                 var acl = privateKeyInfo.GetAccessControl(AccessControlSections.All);
+#endif
 
                 var rules = acl.GetAccessRules(true, true, typeof(SecurityIdentifier));
 

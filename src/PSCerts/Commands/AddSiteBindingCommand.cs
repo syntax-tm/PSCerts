@@ -92,8 +92,18 @@ namespace PSCerts.Commands
 
                 store.Add(cert);
 
+                var pk = PrivateKeyHelper.GetPrivateKey(cert);
                 var mgr = new ServerManager();
                 var site = mgr.Sites.Single(s => s.Name.EqualsIgnoreCase(Site));
+
+                // TODO: Automatically get the identity the app pool is running under and grant readonly permissions to the privatekey
+                //var appPoolName = site.Applications.FirstOrDefault()?.ApplicationPoolName;
+                //
+                //var appPool = mgr.ApplicationPools.SingleOrDefault(p => p.Name.EqualsIgnoreCase(appPoolName));
+                //if (appPool != null)
+                //{
+                //    var appPoolIdentity = appPool.ProcessModel.UserName;
+                //}
 
                 var binding = site.Bindings.Add(BindingInformation, Protocol);
                 binding.CertificateHash = cert.GetCertHash();

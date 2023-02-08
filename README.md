@@ -32,7 +32,7 @@ The `build.ps1` script will build and publish both the CLR (`net472`) and Core C
 .\src\scripts\build.ps1
 ```
 
-Once that is done, the module and all required assemblies, type data, manifest, etc will be in the `src\publish` directory. If you are wanting to import the module you can use this directory but it's recommended to use the [Test](#Test) script.
+Once that is done, the module and all required assemblies, type data, manifest, etc will be in the `src\publish` directory. If you are wanting to import the module you can use this directory but it's recommended to use the [Test](#test) script.
 
 ## Test
 
@@ -52,9 +52,7 @@ If you are developing in VSCode, which is recommnded, you can configure the Powe
 
 ```powershell
 Add-CertPermissions [-Certificate] <X509Certificate2> [-Identity] <string> [-FileSystemRights] <FileSystemRights> [-AccessType] <AccessControlType>
-
 Add-CertPermissions [-Certificate] <X509Certificate2> [-Identity] <string> [-FileSystemRights] <FileSystemRights> [-Deny]
-
 Add-CertPermissions [-Certificate] <X509Certificate2> [-FileSystemAccessRule] <FileSystemAccessRule>
 ```
 
@@ -65,27 +63,22 @@ $cert = Get-Item Cert:\LocalMachine\My\10df834fc47ddfc4d069d2e4fe79e4bf1d6d4dae
 Add-CertPermissions -Certificate $cert -Identity "Network Service" -FileSystemRights FullControl -AccessType Allow
 ```
 
-Returns: [FileSecurity](https://learn.microsoft.com/en-us/dotnet/api/system.security.accesscontrol.filesecurity?view=net-7.0)
+**Returns:** [FileSecurity](https://learn.microsoft.com/en-us/dotnet/api/system.security.accesscontrol.filesecurity?view=net-7.0)
 
 #### Get-CertPermissions
 
 ```powershell
-Get-CertPermissions [-Certificate] <X509Certificate2> [-Explicit] [-Inherited]
+Get-CertPermissions [-Certificate] <X509Certificate2>
 ```
 
 **Examples:**
 
 ```powershell
 $cert = Get-Item Cert:\LocalMachine\My\10df834fc47ddfc4d069d2e4fe79e4bf1d6d4dae
-
-# returns explicit permissions
 Get-CertPermissions -Certificate $cert
-
-# returns explicit and inherited permissions
-Get-CertPermissions -Certificate $cert -Inherited
 ```
 
-Returns: [AuthorizationRuleCollection](https://learn.microsoft.com/en-us/dotnet/api/system.security.accesscontrol.authorizationrulecollection?view=net-7.0)
+**Returns:** [List\<CertAccessRule>](./src/PSCerts/Models/CertAccessRule.cs)
 
 ---
 
@@ -95,7 +88,6 @@ Returns: [AuthorizationRuleCollection](https://learn.microsoft.com/en-us/dotnet/
 
 ```powershell
 Get-CertPrivateKey [-Certificate] <X509Certificate2>
-
 Get-CertPrivateKey [-StoreLocation] <StoreLocation> [-StoreName] <StoreName> [-Key] <string> [-FindType] <X509FindType>
 ```
 
@@ -106,13 +98,37 @@ $cert = Get-Item Cert:\LocalMachine\My\10df834fc47ddfc4d069d2e4fe79e4bf1d6d4dae
 Get-CertPrivateKey -Certificate $cert
 ```
 
-Returns: [FileInfo](https://learn.microsoft.com/en-us/dotnet/api/system.io.fileinfo?view=net-7.0)
+**Returns:** [FileInfo](https://learn.microsoft.com/en-us/dotnet/api/system.io.fileinfo?view=net-7.0)
 
-## Not Available
+#### Get-CertSummary
 
-### Import-Certs
+**Usage:**
 
-**Warning:** Still developing.
+```powershell
+Get-CertSummary [[-Location] <StoreLocation>] [-HasPrivateKey]
+Get-CertSummary [[-Location] <StoreLocation>] [[-Stores] <StoreName[]>] [-HasPrivateKey]
+Get-CertSummary [[-Location] <StoreLocation>] [-Detailed] [-HasPrivateKey]
+```
+
+**Examples:**
+
+```powershell
+Get-CertSummary
+Get-CertSummary -Location LocalMachine
+Get-CertSummary -Detailed
+```
+
+**Returns:** [List\<CertSummaryItem>](./src/PSCerts/Models/Summary/CertSummaryItem.cs)
+
+## Upcoming Features
+
+### Not Documented
+
+#### Add-SiteBinding
+
+### In-Progress
+
+#### Import-Certs
 
 - **certfile (Required):** The full path to the certificate file.
 - **stores (Required):** The stores the certificate will be imported to.

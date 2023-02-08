@@ -22,7 +22,7 @@ else # Desktop
 ModuleVersion = '0.0.8'
 
 # Supported PSEditions
-# CompatiblePSEditions = @()
+CompatiblePSEditions = @('Desktop','Core')
 
 # ID used to uniquely identify this module
 GUID = '49a9cd80-566c-4b57-94e8-4f901894ee33'
@@ -105,7 +105,13 @@ FormatsToProcess = @(
 FunctionsToExport = @()
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
-CmdletsToExport = @('Add-CertPermissions','Get-CertPermissions', 'Get-CertPrivateKey', 'Get-CertSummary')
+CmdletsToExport = @(
+    'Add-CertPermissions',
+    'Add-SiteBinding',
+    'Get-CertPermissions',
+    'Get-CertPrivateKey',
+    'Get-CertSummary'
+)
 
 # Variables to export from this module
 VariablesToExport = '*'
@@ -130,7 +136,7 @@ PrivateData = @{
     PSData = @{
 
         # Tags applied to this module. These help with module discovery in online galleries.
-        Tags = @('Certificates','Key','RSA','PSEdition_Desktop','PSEdition_Core','SSL','PFX')
+            Tags   = @('Certificates', 'Key', 'RSA', 'PSEdition_Desktop', 'PSEdition_Core', 'SSL', 'PFX', 'Windows', 'ACL', 'Certificate', 'Permissions', 'IIS')
 
         # 'Windows','Linux','MacOS'
 
