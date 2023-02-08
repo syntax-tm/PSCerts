@@ -26,18 +26,22 @@ Install-Module -Name PSCerts
 
 ## Build
 
-To build **PSCerts** use the `build.ps1` script in the source directory (`src\Scripts`).
+The `build.ps1` script will build and publish both the CLR (`net472`) and Core CLR (`netstandard2.0`) frameworks.
 
 ```powershell
-.\build.ps1
+.\src\scripts\build.ps1
 ```
+
+Once that is done, the module and all required assemblies, type data, manifest, etc will be in the `src\publish` directory. If you are wanting to import the module you can use this directory but it's recommended to use the [Test](#Test) script.
 
 ## Test
 
-After building, the module can be imported using the module manifest.
+Because **PSCerts** is a binary module, importing the assembly from the build or publish directory will keep you from being able to buiild and/or deploy. Simply removing the module from the session with `Remove-Module` is **not** enough to remove the actual assembly reference. To get around this, `test.ps1` will run `build.ps1` and copy everything to `src\test`. You can load the assembly from the `test` path and still be able run build and publish.
 
-```powershell
-Import-Module .\bin\Debug\PSCerts.psd1
+If you are developing in VSCode, which is recommnded, you can configure the PowerShell add-on to create a temporary console for each debugging session. This prevents locking the binary and the script will automatically re-import the module with each session.
+
+```json
+"powershell.debugging.createTemporaryIntegratedConsole": true
 ```
 
 ## Commands
@@ -104,27 +108,16 @@ Get-CertPrivateKey -Certificate $cert
 
 Returns: [FileInfo](https://learn.microsoft.com/en-us/dotnet/api/system.io.fileinfo?view=net-7.0)
 
-### Not Available
+## Not Available
 
 ### Import-Certs
 
 **Warning:** Still developing.
 
-##### certfile (Required)
-
-The full path to the certificate file.
-
-##### stores (Required)
-
-The stores the certificate will be imported to.
-
-##### permissions (Required)
-
-The stores the certificate will be imported to.
-
-##### password
-
-The password section can load the password directly from the config, an environment variable, or a file.
+- **certfile (Required):** The full path to the certificate file.
+- **stores (Required):** The stores the certificate will be imported to.
+- **permissions (Required)**: The stores the certificate will be imported to.
+- **password:** The password section can load the password directly from the config, an environment variable, or a file.
 
 <table>
   <tr>
@@ -176,7 +169,7 @@ The password section can load the password directly from the config, an environm
 {
   "cert": "C:\\secrets\\TestCert.pfx",
   "password": {
-    "type": "file"
+    "type": "file",
     "filePath": "C:\\secrets\\TestCert.pfx.pwd"
   },
   "stores": [
