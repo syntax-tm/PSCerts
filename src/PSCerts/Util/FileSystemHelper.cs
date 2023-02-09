@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Security.AccessControl;
+using System.Security.Principal;
 using System.Text;
 using Microsoft.Win32.SafeHandles;
 
@@ -15,9 +19,24 @@ namespace PSCerts.Util
         [DllImport("kernel32.dll", EntryPoint = "GetFinalPathNameByHandleW", CharSet = CharSet.Unicode, SetLastError = true)]
         private static extern int GetFinalPathNameByHandle([In] SafeFileHandle hFile, [Out] StringBuilder lpszFilePath, [In] int cchFilePath, [In] int dwFlags);
 
-        private const int CREATION_DISPOSITION_OPEN_EXISTING = 3;
-        private const int FILE_FLAG_BACKUP_SEMANTICS = 0x02000000;
-        
+        public static List<CertAccessRule> GetFileAccess(string fileName)
+        {
+            var fi = new FileInfo(fileName);
+#if NETFRAMEWORK
+            var acl = File.GetAccessControl(fileName);
+#else
+            var acl = fi.GetAccessControl(AccessControlSections.All);
+#endif
+
+            var rules = acl.GetAccessRules(true, true, typeof(SecurityIdentifier));
+            var perms = rules
+                .AsList<FileSystemAccessRule>()
+                .Select(CertAccessRule.Create)
+                .ToList();
+
+            return perms;
+        }
+
         public static bool IsReparsePoint(string path)
         {
             return File.GetAttributes(path).HasFlag(FileAttributes.ReparsePoint);
@@ -78,6 +97,5 @@ namespace PSCerts.Util
 
             return finalPath;
         }
-
     }
 }

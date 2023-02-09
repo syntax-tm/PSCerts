@@ -132,8 +132,6 @@ PrivateData = @{
         # Tags applied to this module. These help with module discovery in online galleries.
         Tags = @('Certificates','Key','RSA','PSEdition_Desktop','PSEdition_Core','SSL','PFX')
 
-        # 'Windows','Linux','MacOS'
-
         # A URL to the license for this module.
         # LicenseUri = ''
 

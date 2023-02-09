@@ -33,15 +33,15 @@ namespace PSCerts
             Identity = SID?.GetAccountName() ?? accessRule.IdentityReference.ToString();
         }
 
+        public static CertAccessRule Create(FileSystemAccessRule accessRule)
+        {
+            return new CertAccessRule(accessRule);
+        }
+
         public override string ToString()
         {
             var sb = new StringBuilder();
-            //var inheritedSymbol = IsInherited ? " (I)" : "";
-            //sb.Append("{");
             sb.AppendFormat("[{0}] {1}", AccessType.ToString(), Identity);
-            //sb.Append(Identity);
-            //sb.Append("}");
-
             return sb.ToString();
         }
     }

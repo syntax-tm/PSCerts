@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
 using System.Linq;
 using System.Security;
 using System.Security.Principal;
@@ -50,6 +49,22 @@ namespace PSCerts
             return description;
         }
 
+        public static bool TryGetValueFromDescription<T>(this string description, out T value)
+            where T : struct, IConvertible
+        {
+            value = default;
+
+            try
+            {
+                value = GetValueFromDescription<T>(description);
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         public static T GetValueFromDescription<T>(this string description)
             where T : struct, IConvertible
         {
@@ -78,6 +93,5 @@ namespace PSCerts
 
             return sid.Translate(typeof(NTAccount)).ToString();
         }
-
     }
 }
