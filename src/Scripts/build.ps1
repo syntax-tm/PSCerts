@@ -23,10 +23,6 @@ $moduleFiles = @(
 $projectFileName = "PSCerts.csproj"
 $projectFile = Join-Path $slnRoot "PSCerts\$projectFileName"
 $publishPath = Join-Path $slnRoot "publish"
-#$modulePath = Join-Path $slnRoot "PSCerts\bin\$Configuration\$framework\PSCerts.psd1"
-
-#$configPath = Join-Path $PSScriptRoot "config.json"
-#$config = Get-Content $configPath | ConvertFrom-Json
 
 $global:BuildStatusCode = 0
 

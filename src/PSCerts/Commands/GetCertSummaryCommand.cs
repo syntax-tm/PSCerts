@@ -80,22 +80,12 @@ namespace PSCerts.Commands
 
                             if (PrivateKeyHelper.TryGetPrivateKey(cert, out var privateKeyFile))
                             {
-                                
                                 var privateKeyInfo = new FileInfo(privateKeyFile);
-#if NETFRAMEWORK
-                                var acl = File.GetAccessControl(privateKeyFile);
-#else
-                                var acl = privateKeyInfo.GetAccessControl(AccessControlSections.All);
-#endif
-
-                                var rules = acl.GetAccessRules(true, true, typeof(SecurityIdentifier));
-
                                 summary.PrivateKey = privateKeyInfo;
                                 
-                                var perms = rules
-                                    .AsList<FileSystemAccessRule>()
-                                    .Select(r => new CertAccessRule(r))
-                                    .ToList();
+                                var acl = FileSystemHelper.GetAccessControl(privateKeyFile);
+                                var rules = acl.GetAccessRules(true, true, typeof(SecurityIdentifier));
+                                var perms = CertAccessRule.Create(rules);
 
                                 summary.Permissions = perms;
                             }

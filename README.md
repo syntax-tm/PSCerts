@@ -46,7 +46,9 @@ If you are developing in VSCode, which is recommnded, you can configure the Powe
 
 ## Commands
 
-#### Add-CertPermissions
+### Add-CertPermissions
+
+Adds a [FileSystemAccessRule](https://learn.microsoft.com/en-us/dotnet/api/system.security.accesscontrol.filesystemaccessrule) to the access control and audit security for a certificate's private key file.
 
 **Usage:**
 
@@ -65,7 +67,11 @@ Add-CertPermissions -Certificate $cert -Identity "Network Service" -FileSystemRi
 
 **Returns:** [FileSecurity](https://learn.microsoft.com/en-us/dotnet/api/system.security.accesscontrol.filesecurity?view=net-7.0)
 
-#### Get-CertPermissions
+---
+
+### Get-CertPermissions
+
+Returns the access control and audit security for a certificate's private key.
 
 ```powershell
 Get-CertPermissions [-Certificate] <X509Certificate2>
@@ -82,7 +88,9 @@ Get-CertPermissions -Certificate $cert
 
 ---
 
-#### Get-CertPrivateKey
+### Get-CertPrivateKey
+
+Determines the name and location of the certificate's private key.
 
 **Usage:**
 
@@ -100,7 +108,9 @@ Get-CertPrivateKey -Certificate $cert
 
 **Returns:** [FileInfo](https://learn.microsoft.com/en-us/dotnet/api/system.io.fileinfo?view=net-7.0)
 
-#### Get-CertSummary
+### Get-CertSummary
+
+Returns information about installed certificates including the `Subject`, `Thumbprint`, `StoreLocation`, `Store`, private key name and path, permissions, and more. The return value can be used for further processing or displayed in the console.
 
 **Usage:**
 
@@ -118,93 +128,60 @@ Get-CertSummary -Location LocalMachine
 Get-CertSummary -Detailed
 ```
 
-**Returns:** [List\<CertSummaryItem>](./src/PSCerts/Models/Summary/CertSummaryItem.cs)
+**Returns:** [List\<CertSummaryItem>](/src/PSCerts/Models/Summary/CertSummaryItem.cs)
 
-## Upcoming Features
+---
 
-### Not Documented
+## In-Progress
 
-#### Add-SiteBinding
+<details>
+  <summary><b>Add-SiteBinding</b></summary>
 
-### In-Progress
+Adds a new or updates an existing IIS site's binding.
 
-#### Import-Certs
+TODO: Consider renaming the noun and using the `Set` verb instead of `Add`.
 
-- **certfile (Required):** The full path to the certificate file.
-- **stores (Required):** The stores the certificate will be imported to.
-- **permissions (Required)**: The stores the certificate will be imported to.
-- **password:** The password section can load the password directly from the config, an environment variable, or a file.
+</details>
 
-<table>
-  <tr>
-    <th>Type</th>
-    <th>Description</th>
-    <th>Example</th>
-  </tr>
-  <tr>
-    <td align="center"><code>text</code></td>
-    <td>
-      The <strong>value</strong> is the password. <i>(Not recommended)</i>
-    </td>
-    <td>
-      <pre>{
-    "type": "text",
-    "value": "abc123"
-}</pre>
-    </td>
-  </tr>
-  <tr>
-    <td align="center"><code>file</code></td>
-    <td>
-      The <strong>value</strong> property is the name of a file containing the password.
-    </td>
-    <td>
-      <pre>{
-    "type": "file",
-    "value": "C:\\secrets\\TestCert.pfx.pwd"
-}</pre>
-    </td>
-  </tr>
-  <tr>
-    <td align="center"><code>env</code></td>
-    <td>
-      The <strong>value</strong> property is the name of the environment variable containing the password.</i>
-    </td>
-    <td>
-      <pre>{
-    "type": "text",
-    "value": "SECRET_CERT_PW"
-}</pre>
-    </td>
-  </tr>
-</table>
+<details>
+  <summary><b>Import-Certs</b></summary>
 
-#### Sample Config
+**certfile (Required):** The path to a certificate file
+**stores (Required):** One or more stores the certificate will be imported to
+**permissions:** File permissions for the private key (Optional)
+**password:** The password for the certificate.
 
-```json
-{
-  "cert": "C:\\secrets\\TestCert.pfx",
-  "password": {
-    "type": "file",
-    "filePath": "C:\\secrets\\TestCert.pfx.pwd"
-  },
-  "stores": [
-    {
-      "location": "LocalMachine",
-      "store": "My"
-    },
-    {
-      "location": "CurrentUser",
-      "store": "Root"
-    }
-  ],
-  "permissions": [
-    {
-      "identity": "NETWORK SERVICE",
-      "rights": "FullControl",
-      "access": "Allow"
-    }
-  ],
-  "exportable": true
-}
-```
+The `type` indicates how to handle the `value` property (see below).
+
+- Type: `text`
+  - The <strong>value</strong> is the password. <i>(Not recommended)</i>
+  - [Example](/docs/examples/ImportCerts/basic.json)
+- Type: `file`
+  - The <strong>value</strong> is the path to a file that contains the password.
+  - [Example](/docs/examples/ImportCerts/passwordFromFile.json)
+- Type: `env`
+  - The <strong>value</strong> is the name of an environment variable containing the password.
+  - [Example](/docs/examples/ImportCerts/passwordFromEnv.json)
+
+</details>
+
+## TODO
+
+- [ ] Finish `Add-SiteBinding`
+- [ ] Finish `Import-Certs`
+- [ ] Add Cmdlet help information
+- [ ] Add unit tests
+- [ ] Add support for .NET 4.6.1 (or older)
+- [ ] Add version history, release notes, etc. to the module manifest
+- [ ] Move non-Cmdlet code to a separate project
+- [ ] Create NuGet package for the core functionality
+- [ ] Come up with better names for the model classes (and others)
+- [ ] Move [Version History](#version-history) to its own file
+- [ ] Create documentation (wiki)
+
+## Version History
+
+- **0.0.9**
+  - Updated `README.md`
+  - Fixed ACLs on Windows PowerShell
+  - Misc. cleanup

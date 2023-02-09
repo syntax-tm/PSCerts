@@ -1,40 +1,28 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.AccessControl;
-using System.Security.Principal;
 using System.Text;
-using Microsoft.Win32.SafeHandles;
 
 namespace PSCerts.Util
 {
     public static class FileSystemHelper
     {
-        [DllImport("kernel32.dll", EntryPoint = "CreateFileW", CharSet = CharSet.Unicode, SetLastError = true)]
-        private static extern SafeFileHandle CreateFile(string lpFileName, int dwDesiredAccess, int dwShareMode, IntPtr securityAttributes, int dwCreationDisposition, int dwFlagsAndAttributes, IntPtr hTemplateFile);
-
-        [DllImport("kernel32.dll", EntryPoint = "GetFinalPathNameByHandleW", CharSet = CharSet.Unicode, SetLastError = true)]
-        private static extern int GetFinalPathNameByHandle([In] SafeFileHandle hFile, [Out] StringBuilder lpszFilePath, [In] int cchFilePath, [In] int dwFlags);
-
-        public static List<CertAccessRule> GetFileAccess(string fileName)
+        public static FileSecurity GetAccessControl(string fileName)
         {
             var fi = new FileInfo(fileName);
+            return GetAccessControl(fi);
+        }
+
+        public static FileSecurity GetAccessControl(FileInfo fileInfo)
+        {
 #if NETFRAMEWORK
-            var acl = File.GetAccessControl(fileName);
+            var acl = File.GetAccessControl(fileInfo.FullName, AccessControlSections.All);
 #else
-            var acl = fi.GetAccessControl(AccessControlSections.All);
+            var acl = fileInfo.GetAccessControl(AccessControlSections.All);
 #endif
-
-            var rules = acl.GetAccessRules(true, true, typeof(SecurityIdentifier));
-            var perms = rules
-                .AsList<FileSystemAccessRule>()
-                .Select(CertAccessRule.Create)
-                .ToList();
-
-            return perms;
+            return acl;
         }
 
         public static bool IsReparsePoint(string path)
@@ -75,14 +63,14 @@ namespace PSCerts.Util
                 throw new IOException($"Path '{path}' does not exist.");
             }
             
-            var directoryHandle = CreateFile(path, 0, 2, IntPtr.Zero, (int) ECreationDisposition.OpenExisting, (int) EFileAttributes.BackupSemantics, IntPtr.Zero);
+            var directoryHandle = Native.CreateFile(path, 0, 2, IntPtr.Zero, (int) ECreationDisposition.OpenExisting, (int) EFileAttributes.BackupSemantics, IntPtr.Zero);
             if (directoryHandle.IsInvalid)
             {
                 throw new Win32Exception(Marshal.GetLastWin32Error());
             }
 
             var result = new StringBuilder(512);
-            var mResult = GetFinalPathNameByHandle(directoryHandle, result, result.Capacity, 0);
+            var mResult = Native.GetFinalPathNameByHandle(directoryHandle, result, result.Capacity, 0);
 
             if (mResult < 0)
             {

@@ -16,7 +16,7 @@ namespace PSCerts.Commands
     public class GetCertPermissionsCommand : PSCmdlet
     {
         [Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true, ValueFromPipelineByPropertyName = true)]
-        [Alias("Cert")]
+        [Alias("Cert", "InputObject")]
         public X509Certificate2 Certificate { get; set; }
         
         protected override void ProcessRecord()
@@ -25,18 +25,9 @@ namespace PSCerts.Commands
             {
                 var privateKeyFile = PrivateKeyHelper.GetPrivateKey(Certificate);
                 var privateKeyInfo = new FileInfo(privateKeyFile);
-
-#if NETFRAMEWORK
-                var acl = File.GetAccessControl(privateKeyFile);
-#else
-                var acl = privateKeyInfo.GetAccessControl(AccessControlSections.All);
-#endif
-
+                var acl = FileSystemHelper.GetAccessControl(privateKeyFile);
                 var rules = acl.GetAccessRules(true, true, typeof(SecurityIdentifier));
-
-                var perms = rules.AsList<FileSystemAccessRule>()
-                    .Select(r => new CertAccessRule(r))
-                    .ToList();
+                var perms = CertAccessRule.Create(rules);
             
                 WriteObject(perms, false);
             }

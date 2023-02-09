@@ -51,17 +51,15 @@ namespace PSCerts.Commands
             {
                 var privateKeyFile = PrivateKeyHelper.GetPrivateKey(Certificate);
                 var privateKeyInfo = new FileInfo(privateKeyFile);
+                var access = Deny.IsPresent
+                    ? AccessControlType.Deny
+                    : AccessType;
 
-#if NETFRAMEWORK
-                var acl = File.GetAccessControl(privateKeyFile);
-#else
-                var acl = privateKeyInfo.GetAccessControl(AccessControlSections.All);
-#endif
-
+                var acl = FileSystemHelper.GetAccessControl(privateKeyFile);
                 var rule = ParameterSetName switch
                 {
-                    PROPS_PARAM_SET       => new (Identity, FileSystemRights, AccessType),
-                    PROPS_DENY_PARAM_SET  => new (Identity, FileSystemRights, AccessControlType.Deny),
+                    PROPS_PARAM_SET or
+                    PROPS_DENY_PARAM_SET  => new (Identity, FileSystemRights, access),
                     ACCESS_RULE_PARAM_SET => FileSystemAccessRule,
                     _                     => throw new ArgumentException($"Unknown {nameof(ParameterSetName)} {ParameterSetName}.")
                 };

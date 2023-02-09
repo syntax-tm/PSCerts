@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Text;
@@ -36,6 +38,15 @@ namespace PSCerts
         public static CertAccessRule Create(FileSystemAccessRule accessRule)
         {
             return new CertAccessRule(accessRule);
+        }
+
+        public static List<CertAccessRule> Create(AuthorizationRuleCollection rules)
+        {
+            var perms = rules
+                .AsList<FileSystemAccessRule>()
+                .Select(Create)
+                .ToList();
+            return perms;
         }
 
         public override string ToString()

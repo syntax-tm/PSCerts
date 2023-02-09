@@ -1,0 +1,25 @@
+{
+  "cert": "C:\\secrets\\TestCert.pfx",
+  "password": {
+    "type": "text",
+    "value": "abc123"
+  },
+  "stores": [
+    {
+      "location": "LocalMachine",
+      "store": "My"
+    },
+    {
+      "location": "CurrentUser",
+      "store": "Root"
+    }
+  ],
+  "permissions": [
+    {
+      "identity": "NETWORK SERVICE",
+      "rights": "FullControl",
+      "access": "Allow"
+    }
+  ],
+  "exportable": true
+}

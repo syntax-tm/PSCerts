@@ -201,15 +201,21 @@ namespace PSCerts.Util
             var commonAppData = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
             var winDir = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
 
-            return new()
+            var containers = new List<string>()
             {
                 RSA_SCHANNEL_KEYS,
                 APPDATA_MS_CRYPTO_KEYS,
-                PROGRAMDATA_MS_CRYPTO_KEYS,
                 $"{commonAppData}\\Microsoft\\Crypto\\RSA\\MachineKeys",
                 $"{appData}\\Microsoft\\Crypto\\RSA",
                 $"{winDir}\\ServiceProfiles"
             };
+
+            if (IdentityHelper.IsAdministrator)
+            {
+                containers.Add(PROGRAMDATA_MS_CRYPTO_KEYS);
+            }
+
+            return containers;
         }
 
         [DllImport("crypt32", CharSet = CharSet.Unicode, SetLastError = true)]

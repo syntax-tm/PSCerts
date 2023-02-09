@@ -19,10 +19,10 @@ else # Desktop
 }
 
 # Version number of this module.
-ModuleVersion = '0.0.8'
+ModuleVersion = '0.0.9'
 
-# Supported PSEditions
-CompatiblePSEditions = @('Desktop','Core')
+# Supported PSEditions (PS 5.1+)
+# CompatiblePSEditions = @('Desktop','Core')
 
 # ID used to uniquely identify this module
 GUID = '49a9cd80-566c-4b57-94e8-4f901894ee33'
