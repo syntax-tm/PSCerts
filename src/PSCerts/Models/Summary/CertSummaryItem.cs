@@ -9,14 +9,14 @@ namespace PSCerts.Summary
     [DebuggerDisplay("{Subject} ({Thumbprint})")]
     public class CertSummaryItem
     {
-        public StoreLocation Location { get; set; }
+        public StoreLocation Location { get; internal set; }
         public string Store { get; set; }
         public string FriendlyName { get; }
         public string Thumbprint { get; }
         public string Subject { get; }
         public bool HasPrivateKey => PrivateKey != null;
-        public FileInfo PrivateKey { get; set; }
-        public List<CertAccessRule> Permissions { get; set; }
+        public FileInfo PrivateKey { get; internal set; }
+        public List<CertAccessRule> Permissions { get; internal set; }
         public X509Certificate2 Certificate { get; }
 
         public CertSummaryItem(X509Certificate2 certificate)

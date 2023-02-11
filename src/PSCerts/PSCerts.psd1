@@ -57,20 +57,20 @@ DotNetFrameworkVersion = '4.7.2'
 # Assemblies that must be loaded prior to importing this module
 RequiredAssemblies = if($PSEdition -eq 'Core')
 {
-    'coreclr\Newtonsoft.Json.dll',
     'coreclr\JsonSubTypes.dll',
     'coreclr\Microsoft.Web.Administration.dll',
+    'coreclr\Newtonsoft.Json.dll',
     'coreclr\System.Buffers.dll',
+    'coreclr\System.IO.FileSystem.AccessControl.dll'
+    'coreclr\System.IO.FileSystem.Primitives.dll',
     'coreclr\System.Memory.dll',
     'coreclr\System.Numerics.Vectors.dll',
-    'coreclr\System.Threading.dll',
+    'coreclr\System.Reflection.TypeExtensions.dll',
     'coreclr\System.Runtime.CompilerServices.Unsafe.dll',
+    'coreclr\System.Security.AccessControl.dll',
     'coreclr\System.Security.Cryptography.Cng.dll',
     'coreclr\System.Security.Principal.Windows.dll',
-    'coreclr\System.Reflection.TypeExtensions.dll',
-    'coreclr\System.IO.FileSystem.Primitives.dll',
-    'coreclr\System.Security.AccessControl.dll',
-    'coreclr\System.IO.FileSystem.AccessControl.dll'
+    'coreclr\System.Threading.dll'
 }
 else # Desktop
 {
@@ -110,7 +110,8 @@ CmdletsToExport = @(
     'Add-SiteBinding',
     'Get-CertPermissions',
     'Get-CertPrivateKey',
-    'Get-CertSummary'
+    'Get-CertSummary',
+    'Import-Certs'
 )
 
 # Variables to export from this module

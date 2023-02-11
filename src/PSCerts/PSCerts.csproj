@@ -5,7 +5,6 @@
     <AssemblyName>PSCerts</AssemblyName>
     <LangVersion>preview</LangVersion>
     <TargetFrameworks>net472;netstandard2.0;net7.0-windows</TargetFrameworks>
-    <!--<TargetFrameworks>netstandard2.0;net7.0;net48;net472</TargetFrameworks>-->
     <Title>PSCerts</Title>
     <Description>Powershell module for managing certificates</Description>
     <PackageProjectUrl>https://github.com/syntax-tm/PSCerts</PackageProjectUrl>
@@ -15,8 +14,7 @@
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <Configurations>Debug;Release;UnitTests</Configurations>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <!--<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>-->
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
@@ -24,6 +22,10 @@
     <Optimize>False</Optimize>
   </PropertyGroup>
 
+  <PropertyGroup Condition="$(TargetFramework.StartsWith('net4'))">
+    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
+  </PropertyGroup>
+    
   <ItemGroup>
     <None Remove="PSCerts.csproj.DotSettings" />
   </ItemGroup>
@@ -31,9 +33,12 @@
   <!-- All TargetFrameworks -->
   <ItemGroup>
     <PackageReference Include="JsonSubTypes" Version="2.0.1" />
-    <PackageReference Include="Microsoft.Web.Administration" Version="11.1.0" />
-    <!--<PackageReference Include="Microsoft.Bcl.Build" Version="1.0.21" />-->
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3-beta1" />
+    <PackageReference Include="System.Linq" Version="4.3.0" />
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
+    <!-- ReSharper disable VulnerablePackage -->
+    <PackageReference Include="Microsoft.Web.Administration" Version="11.1.0" />
+    <!-- ReSharper restore VulnerablePackage -->
     <PackageReference Include="PowerShellStandard.Library" Version="7.0.0-preview.1">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
@@ -42,9 +47,6 @@
     <PackageReference Include="System.IO.FileSystem.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Security.AccessControl" Version="6.0.0" />
     <PackageReference Include="System.Security.Cryptography.Cng" Version="6.0.0-preview.4.21253.7" />
-    <!--<PackageReference Include="System.Security.AccessControl" Version="6.0.0" />
-    <PackageReference Include="System.Security.Cryptography.Cng" Version="5.0.0" />
-    <PackageReference Include="System.Security.Cryptography.X509Certificates" Version="4.3.2" />-->
   </ItemGroup>
 
   <!-- .NET Standard -->
@@ -53,19 +55,13 @@
     <!--<PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.0" />-->
     <!-- <PackageReference Include="System.Security.Cryptography.Cng" Version="5.0.0" /> -->
     <!--<PackageReference Include="System.Security.Cryptography.Encoding" Version="4.3.0" />-->
-
   </ItemGroup>
 
   <!-- .NET Framework -->
   <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
     <!-- <PackageReference Include="System.Security.AccessControl" Version="6.0.0" /> -->
-    
   </ItemGroup>
 
-  <PropertyGroup Condition="$(TargetFramework.StartsWith('net4'))">
-    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
-  </PropertyGroup>
-    
   <ItemGroup>
     <None Update="PSCerts.format.ps1xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

@@ -9,6 +9,49 @@ namespace PSCerts.Util
 {
     public static class FileSystemHelper
     {
+        public static FileSecurity AddAccessControl(string fileName, string appPoolIdentity, FileSystemRights rights = FileSystemRights.Read,
+                                                    AccessControlType accessType = AccessControlType.Allow)
+        {
+            var fileInfo = new FileInfo(fileName);
+            return AddAccessControl(fileInfo, appPoolIdentity, rights, accessType);
+        }
+
+        public static FileSecurity AddAccessControl(FileInfo fileInfo, string appPoolIdentity, FileSystemRights rights = FileSystemRights.Read,
+                                                    AccessControlType accessType = AccessControlType.Allow)
+        {
+            var rule = new FileSystemAccessRule(appPoolIdentity, rights, accessType);
+            return AddAccessControl(fileInfo, rule);
+        }
+
+        public static FileSecurity AddAccessControl(string fileName, FileSystemAccessRule rule)
+        {
+            var fi = new FileInfo(fileName);
+            return AddAccessControl(fi, rule);
+        }
+
+        public static FileSecurity AddAccessControl(FileInfo fileInfo, FileSystemAccessRule rule)
+        {
+            var acl = GetAccessControl(fileInfo);
+            acl.AddAccessRule(rule);
+            SetAccessControl(fileInfo, acl);
+            return acl;
+        }
+
+        public static void SetAccessControl(string fileName, FileSecurity acl)
+        {
+            var fi = new FileInfo(fileName);
+            SetAccessControl(fi, acl);
+        }
+
+        public static void SetAccessControl(FileInfo fileInfo, FileSecurity acl)
+        {
+#if NETFRAMEWORK
+            File.SetAccessControl(fileInfo.FullName, acl);
+#else
+            fileInfo.SetAccessControl(acl);
+#endif
+        }
+
         public static FileSecurity GetAccessControl(string fileName)
         {
             var fi = new FileInfo(fileName);
@@ -48,12 +91,9 @@ namespace PSCerts.Util
                 return new FileInfo(resolvedPath);
             }
 
-            if (Directory.Exists(resolvedPath))
-            {
-                return new DirectoryInfo(resolvedPath);
-            }
-
-            throw new ArgumentException("Invalid path.", nameof(path));
+            return Directory.Exists(resolvedPath)
+                ? new DirectoryInfo(resolvedPath)
+                : throw new ArgumentException("Invalid path.", nameof(path));
         }
         
         private static string ResolveSymLink(string path)
@@ -78,12 +118,9 @@ namespace PSCerts.Util
             }
 
             var finalPath = result.ToString();
-            if (finalPath.StartsWith(@"\\?\"))
-            {
-                return finalPath.Substring(4);
-            }
-
-            return finalPath;
+            return finalPath.StartsWith(@"\\?\")
+                ? finalPath.Substring(4)
+                : finalPath;
         }
     }
 }

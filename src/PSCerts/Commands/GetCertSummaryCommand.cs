@@ -1,23 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Management.Automation;
-using System.Management.Automation.Runspaces;
-using System.Security;
-using System.Security.AccessControl;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
-using PSCerts.Config;
 using PSCerts.Summary;
 using PSCerts.Util;
 
 namespace PSCerts.Commands
 {
+    /// <summary>
+    /// <para type="synopsis">Returns information about installed certificates.</para>
+    /// <para type="description">A <see cref="CertSummaryItem"/> containing information about currently installed certificates.</para>
+    /// </summary>
+    /// <seealso cref="CertSummaryItem" />
+    /// <seealso cref="X509Certificate2" />
     [Cmdlet(VerbsCommon.Get, "CertSummary", DefaultParameterSetName = DEFAULT_PARAM_SET)]
-    [OutputType(typeof(List<CertSummaryItem>))]
+    [OutputType(typeof(CertSummary))]
     //[OutputType(typeof(List<CertSummary>))]
     public class GetCertSummaryCommand : PSCmdlet
     {
@@ -25,15 +25,27 @@ namespace PSCerts.Commands
         private const string CUSTOM_PARAM_SET = nameof(CUSTOM_PARAM_SET);
         private const string DETAILED_RULE_PARAM_SET = nameof(DETAILED_RULE_PARAM_SET);
 
+        /// <summary>
+        /// <para type="description">The <see cref="StoreLocation"/>s to search.</para>
+        /// </summary>
         [Parameter(Position = 0)]
         public StoreLocation? Location { get; set; }
-
+        
+        /// <summary>
+        /// <para type="description">The <see cref="X509Store"/>s to search.</para>
+        /// </summary>
         [Parameter(Position = 1, ParameterSetName = CUSTOM_PARAM_SET)]
         public StoreName[] Stores { get; set; }
-
+        
+        /// <summary>
+        /// <para type="description">Returns certificates from every <see cref="X509Store"/> in each <see cref="StoreLocation"/>.</para>
+        /// </summary>
         [Parameter(ParameterSetName = DETAILED_RULE_PARAM_SET)]
         public SwitchParameter Detailed { get; set; }
-        
+
+        /// <summary>
+        /// <para type="description">Returns only certificates with a private key.</para>
+        /// </summary>
         [Parameter]
         public SwitchParameter HasPrivateKey { get; set; }
 
@@ -41,30 +53,17 @@ namespace PSCerts.Commands
         {
             try
             {
-                var certs = new List<CertSummaryItem>();
+                var summary = new CertSummary();
                 var pkOnly = HasPrivateKey.IsPresent;
-
-                List<StoreName> stores;
+                
                 List<StoreLocation> locations = Location.HasValue
                     ? new () { Location.Value }
                     : new () { StoreLocation.CurrentUser, StoreLocation.LocalMachine };
 
-                if (Detailed.IsPresent)
-                {
-                    stores = Enum.GetValues(typeof(StoreName)).AsList<StoreName>();
-                }
-                else if (Stores?.Any() ?? false)
-                {
-                    stores = new (Stores);
-                }
-                else
-                {
-                    stores = new ()
-                    {
-                        StoreName.My
-                    };
-                }
-                
+                var stores = Detailed.IsPresent
+                    ? Enum.GetValues(typeof(StoreName)).AsList<StoreName>()
+                    : Stores?.ToList() ?? new () { StoreName.My };
+
                 foreach (var location in locations)
                 foreach (var storeName in stores)
                 {
@@ -76,25 +75,32 @@ namespace PSCerts.Commands
 
                         foreach (var cert in store.Certificates)
                         {
-                            var summary = new CertSummaryItem(store, cert);
-
-                            if (PrivateKeyHelper.TryGetPrivateKey(cert, out var privateKeyFile))
+                            try
                             {
-                                var privateKeyInfo = new FileInfo(privateKeyFile);
-                                summary.PrivateKey = privateKeyInfo;
-                                
-                                var acl = FileSystemHelper.GetAccessControl(privateKeyFile);
-                                var rules = acl.GetAccessRules(true, true, typeof(SecurityIdentifier));
-                                var perms = CertAccessRule.Create(rules);
+                                var summaryItem = new CertSummaryItem(store, cert);
 
-                                summary.Permissions = perms;
+                                if (PrivateKeyHelper.TryGetPrivateKey(cert, out var privateKeyFile))
+                                {
+                                    var privateKeyInfo = new FileInfo(privateKeyFile);
+                                    summaryItem.PrivateKey = privateKeyInfo;
+
+                                    var acl = FileSystemHelper.GetAccessControl(privateKeyFile);
+                                    var rules = acl.GetAccessRules(true, true, typeof(SecurityIdentifier));
+                                    var perms = CertAccessRule.Create(rules);
+
+                                    summaryItem.Permissions = perms;
+                                }
+                                else if (pkOnly)
+                                {
+                                    continue;
+                                }
+
+                                summary.Items.Add(summaryItem);
                             }
-                            else if (pkOnly)
+                            catch (Exception ex)
                             {
-                                continue;
+                                WriteVerbose($"An exception occurred processing the {nameof(X509Certificate2)} with thumbprint '{cert?.Thumbprint}'. Details: {ex.Message}");
                             }
-
-                            certs.Add(summary);
                         }
                     }
                     finally
@@ -103,12 +109,11 @@ namespace PSCerts.Commands
                     }
                 }
 
-                WriteObject(certs, true);
+                WriteObject(summary);
             }
             catch (Exception e)
             {
-                var error = ErrorHelper.CreateError(e);
-                ThrowTerminatingError(error);
+                this.ThrowTerminatingException(e);
             }
         }
     }

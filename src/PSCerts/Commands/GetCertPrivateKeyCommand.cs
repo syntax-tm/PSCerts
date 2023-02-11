@@ -1,8 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Management.Automation;
-using System.Management.Automation.Runspaces;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using PSCerts.Util;
 
@@ -12,8 +10,8 @@ namespace PSCerts.Commands
     [OutputType(typeof(FileInfo))]
     public class GeCertPrivateKeyCommand : PSCmdlet
     {
-        private const string CERT_PARAM_SET = "Certificate";
-        private const string FIND_PARAM_SET = "Find";
+        private const string CERT_PARAM_SET = nameof(CERT_PARAM_SET);
+        private const string FIND_PARAM_SET = nameof(FIND_PARAM_SET);
 
         [Parameter(Mandatory = true, Position = 0,
                    ValueFromPipeline = true, ValueFromPipelineByPropertyName = true, ParameterSetName = CERT_PARAM_SET)]
@@ -54,8 +52,7 @@ namespace PSCerts.Commands
             }
             catch (Exception e)
             {
-                var error = ErrorHelper.CreateError(e);
-                ThrowTerminatingError(error);
+                this.ThrowTerminatingException(e);
             }
         }
     }

@@ -3,8 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Management.Automation;
 using System.Security;
 using System.Security.Principal;
+using PSCerts.Util;
 
 namespace PSCerts
 {
@@ -92,6 +94,12 @@ namespace PSCerts
             if (sid == null) throw new ArgumentNullException(nameof(sid));
 
             return sid.Translate(typeof(NTAccount)).ToString();
+        }
+
+        public static void ThrowTerminatingException(this Cmdlet cmdlet, Exception e)
+        {
+            var error = ErrorHelper.CreateError(e);
+            cmdlet.WriteError(error);
         }
     }
 }

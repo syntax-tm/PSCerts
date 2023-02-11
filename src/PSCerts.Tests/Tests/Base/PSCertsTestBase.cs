@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
+using PSCerts.Util;
 
 namespace PSCerts.Tests
 {
@@ -22,13 +19,15 @@ namespace PSCerts.Tests
         [SetUp]
         public void Setup()
         {
+            VerifyAccess();
+
             ImportTestCert();
             
             var store = new X509Store(StoreName.My, StoreLocation.LocalMachine);
             store.Open(OpenFlags.ReadOnly);
 
             var matches = store.Certificates.Find(X509FindType.FindByThumbprint, THUMBPRINT, false);
-            Certs.AddRange(matches.Cast<X509Certificate2>());
+            Certs.AddRange(matches.AsList<X509Certificate2>());
         }
 
         [TearDown]
@@ -45,7 +44,12 @@ namespace PSCerts.Tests
             
             store.Close();
         }
-        
+
+        private static void VerifyAccess()
+        {
+            Assert.That(IdentityHelper.IsAdministrator, $"{Assembly.GetExecutingAssembly().GetName().Name} is not running as administrator.");
+        }
+
         private static void ImportTestCert()
         {
             var store = new X509Store(StoreName.My, StoreLocation.LocalMachine);

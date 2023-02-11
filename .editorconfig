@@ -3,6 +3,12 @@
 [*]
 indent_style = space
 
+# ReSharper properties
+resharper_xml_blank_line_after_pi = false
+resharper_xml_indent_size = 2
+resharper_xml_max_blank_lines_between_tags = 1
+resharper_xml_tab_width = 2
+
 # C# files
 [*.cs]
 trim_trailing_whitespace = true
@@ -20,3 +26,8 @@ indent_size = 2
 # Xml files
 [*.xml]
 indent_size = 2
+
+[*.{appxmanifest,axaml,axml,build,config,csproj,dbml,discomap,dtd,jsproj,lsproj,njsproj,nuspec,paml,proj,props,StyleCop,targets,tasks,vbproj,xaml,xamlx,xml,xoml,xsd}]
+indent_style = space
+indent_size = 2
+tab_width = 2

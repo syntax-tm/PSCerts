@@ -50,8 +50,7 @@ namespace PSCerts.Commands
             }
             catch (Exception e)
             {
-                var error = ErrorHelper.CreateError(e);
-                ThrowTerminatingError(error);
+                this.ThrowTerminatingException(e);
             }
         }
     }

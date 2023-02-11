@@ -15,7 +15,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{AE13
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1D4246CE-A379-4DEB-A683-E52958108EBC}"
 	ProjectSection(SolutionItems) = preProject
-		..\README.md = ..\README.md
+		..\.editorconfig = ..\.editorconfig
+		..\CHANGELOG.md = ..\CHANGELOG.md
+		..\LICENSE = ..\LICENSE
 	EndProjectSection
 EndProject
 Global

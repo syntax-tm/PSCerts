@@ -55,7 +55,7 @@ Adds a [FileSystemAccessRule](https://learn.microsoft.com/en-us/dotnet/api/syste
 ```powershell
 Add-CertPermissions [-Certificate] <X509Certificate2> [-Identity] <string> [-FileSystemRights] <FileSystemRights> [-AccessType] <AccessControlType>
 Add-CertPermissions [-Certificate] <X509Certificate2> [-Identity] <string> [-FileSystemRights] <FileSystemRights> [-Deny]
-Add-CertPermissions [-Certificate] <X509Certificate2> [-FileSystemAccessRule] <FileSystemAccessRule>
+Add-CertPermissions [-Certificate] <X509Certificate2> [-Rule] <FileSystemAccessRule>
 ```
 
 **Examples:**

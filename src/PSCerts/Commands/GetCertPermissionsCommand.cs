@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Management.Automation;
-using System.Management.Automation.Runspaces;
-using System.Security.AccessControl;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
 using PSCerts.Util;
@@ -24,7 +20,6 @@ namespace PSCerts.Commands
             try
             {
                 var privateKeyFile = PrivateKeyHelper.GetPrivateKey(Certificate);
-                var privateKeyInfo = new FileInfo(privateKeyFile);
                 var acl = FileSystemHelper.GetAccessControl(privateKeyFile);
                 var rules = acl.GetAccessRules(true, true, typeof(SecurityIdentifier));
                 var perms = CertAccessRule.Create(rules);
@@ -33,8 +28,7 @@ namespace PSCerts.Commands
             }
             catch (Exception e)
             {
-                var error = ErrorHelper.CreateError(e);
-                ThrowTerminatingError(error);
+                this.ThrowTerminatingException(e);
             }
         }
     }
