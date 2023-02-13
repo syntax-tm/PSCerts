@@ -10,37 +10,45 @@ namespace PSCerts.Config
     [JsonSubtypes.KnownSubType(typeof(FileSource), SOURCE_TYPE_FILE)]
     [JsonSubtypes.KnownSubType(typeof(TextSource), SOURCE_TYPE_TEXT)]
     [JsonSubtypes.KnownSubType(typeof(EnvironmentVariableSource), SOURCE_TYPE_ENV)]
-    public abstract class CertPassword
+    public abstract class CertPassword : IValidate
     {
-        protected const string SOURCE_TYPE_FILE = "file";
-        protected const string SOURCE_TYPE_ENV = "env";
-        protected const string SOURCE_TYPE_TEXT = "text";
+        protected const string SOURCE_TYPE_FILE = @"file";
+        protected const string SOURCE_TYPE_ENV = @"env";
+        protected const string SOURCE_TYPE_TEXT = @"text";
 
         [JsonProperty("value", Required = Required.Always)]
         protected string Value { get; set; }
 
         public abstract string SourceType { get; }
-        public virtual bool IsValid() => false;
         public abstract string GetValue();
+        public virtual ValidationResult Validate() => new (@"Invalid Type");
     }
 
     public class FileSource : CertPassword
     {
         public override string SourceType => SOURCE_TYPE_FILE;
-        
-        public override bool IsValid()
+
+        public string ResolvedPath
         {
-            if (string.IsNullOrWhiteSpace(Value)) return false;
-            if (!File.Exists(Value)) return false;
+            get
+            {
+                var resolvedPath = FileSystemHelper.ResolvePath(Value);
+                return resolvedPath.FullName;
+            }
+        }
 
-            var resolvedPath = FileSystemHelper.ResolvePath(Value);
+        public override ValidationResult Validate()
+        {
+            if (string.IsNullOrWhiteSpace(Value)) return new ($@"{nameof(Value)} is required.");
+            if (!File.Exists(ResolvedPath)) return new ($@"Password file '{Value}' does not exist.");
 
-            return resolvedPath.Exists;
+            return new ();
         }
 
         public override string GetValue()
         {
-            if (!IsValid()) throw new InvalidOperationException($"Source is not valid.");
+            var validationResult = Validate();
+            validationResult.AssertIsValid();
 
             var resolvedPath = FileSystemHelper.ResolvePath(Value);
             var content = File.ReadAllText(resolvedPath.FullName);
@@ -53,8 +61,20 @@ namespace PSCerts.Config
     {
         public override string SourceType => SOURCE_TYPE_TEXT;
 
-        public override bool IsValid() => !string.IsNullOrWhiteSpace(Value);
-        public override string GetValue() => Value;
+        public override ValidationResult Validate()
+        {
+            if (string.IsNullOrWhiteSpace(Value)) return new ($@"{nameof(Value)} is required.");
+
+            return new ();
+        }
+
+        public override string GetValue()
+        {
+            var validationResult = Validate();
+            validationResult.AssertIsValid();
+
+            return Value;
+        }
     }
 
     public class EnvironmentVariableSource : CertPassword
@@ -63,18 +83,21 @@ namespace PSCerts.Config
 
         public EnvironmentVariableTarget? Target { get; set; }
         
-        public override bool IsValid()
+        public override ValidationResult Validate()
         {
-            if (string.IsNullOrWhiteSpace(Value)) return false;
-
+            if (string.IsNullOrWhiteSpace(Value)) return new ($@"{nameof(Value)} is required.");
+            
             var variable = Environment.GetEnvironmentVariable(Value);
+            
+            if (string.IsNullOrWhiteSpace(variable)) return new ($@"Environment variable '{Value}' is empty.");
 
-            return !string.IsNullOrWhiteSpace(variable);
+            return new ();
         }
 
         public override string GetValue()
         {
-            if (!IsValid()) throw new InvalidOperationException($"Source is not valid.");
+            var validationResult = Validate();
+            validationResult.AssertIsValid();
 
             var variable = Target.HasValue
                 ? Environment.GetEnvironmentVariable(Value, Target.Value)

@@ -34,7 +34,6 @@ if ($null -eq $Matches) {
 }
 
 $versionText = $Matches["version"]
-$versionText
 
 $currentVersion = [version]::Parse($versionText)
 
@@ -64,7 +63,7 @@ else {
 }
 
 $title = 'Update Version'
-$question = "Version '$cyanb$currentVersion$r' will be updated to '$cyanb$newVersion$r'. Are you sure you want to proceed?"
+$question = "`nVersion '$cyanb$currentVersion$r' will be updated to '$cyanb$newVersion$r'. Are you sure you want to proceed?"
 $choices = '&Yes', '&No'
 
 $decision = $Host.UI.PromptForChoice($title, $question, $choices, 1)

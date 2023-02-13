@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
-using System.Management.Automation;
-using System.Management.Automation.Provider;
-using System.Management.Automation.Runspaces;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
@@ -126,10 +123,10 @@ namespace PSCerts.Util
             var algorithms = new List<Type>
             {
                 typeof(RSA),
-                typeof(ECDsa),
+                typeof(ECDsa)
                 //typeof(DSA)
             };
-
+            
             foreach (var alg in algorithms)
             {
                 try
@@ -167,12 +164,12 @@ namespace PSCerts.Util
                     //     }
                     // }
                 }
-                catch (Exception e)
+                catch
                 {
-                    var message = $"Private {alg.Name} private key was not successful.";
-                    message += $"Details: {e.Message}";
-                    
                     // TODO: Write to output from outside of the Cmdlet class
+
+                    // var message = $"Retrieving certificate '{cert.Thumbprint}' private key as {alg.Name} failed. ";
+                    // message += $"Details: {e.Message}";
                 }
             }
             
@@ -197,69 +194,26 @@ namespace PSCerts.Util
 
         private static List<string> GetKeyContainers()
         {
+            // TODO: Validate this list is all inclusive when running as user and admin
             var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             var commonAppData = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
             var winDir = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
 
-            var containers = new List<string>()
+            var containers = new List<string>
             {
-                RSA_SCHANNEL_KEYS,
-                APPDATA_MS_CRYPTO_KEYS,
-                $"{commonAppData}\\Microsoft\\Crypto\\RSA\\MachineKeys",
-                $"{appData}\\Microsoft\\Crypto\\RSA",
-                $"{winDir}\\ServiceProfiles"
+                $@"{appData}\Microsoft\Crypto\RSA",
+                $@"{commonAppData}\Microsoft\Crypto\RSA\MachineKeys"
             };
 
             if (IdentityHelper.IsAdministrator)
             {
+                containers.Add(RSA_SCHANNEL_KEYS);
+                containers.Add(APPDATA_MS_CRYPTO_KEYS);
                 containers.Add(PROGRAMDATA_MS_CRYPTO_KEYS);
+                containers.Add($@"{winDir}\ServiceProfiles");
             }
 
             return containers;
         }
-
-        [DllImport("crypt32", CharSet = CharSet.Unicode, SetLastError = true)]
-        private static extern bool CryptAcquireCertificatePrivateKey(IntPtr pCert, uint dwFlags, IntPtr pvReserved, ref IntPtr phCryptProv, ref int pdwKeySpec, ref bool pfCallerFreeProv);
-
-        [DllImport("advapi32", CharSet = CharSet.Unicode, SetLastError = true)]
-        private static extern bool CryptGetProvParam(IntPtr hCryptProv, CryptGetProvParamType dwParam, IntPtr pvData, ref int pcbData, uint dwFlags);
-
-        [DllImport("advapi32", SetLastError = true)]
-        private static extern bool CryptReleaseContext(IntPtr hProv, uint dwFlags);
-    }
-
-    internal enum CryptGetProvParamType
-    {
-        PP_ENUMALGS = 1,
-        PP_ENUMCONTAINERS = 2,
-        PP_IMPTYPE = 3,
-        PP_NAME = 4,
-        PP_VERSION = 5,
-        PP_CONTAINER = 6,
-        PP_CHANGE_PASSWORD = 7,
-        PP_KEYSET_SEC_DESCR = 8, // get/set security descriptor of keyset
-        PP_CERTCHAIN = 9,        // for retrieving certificates from tokens
-        PP_KEY_TYPE_SUBTYPE = 10,
-        PP_PROVTYPE = 16,
-        PP_KEYSTORAGE = 17,
-        PP_APPLI_CERT = 18,
-        PP_SYM_KEYSIZE = 19,
-        PP_SESSION_KEYSIZE = 20,
-        PP_UI_PROMPT = 21,
-        PP_ENUMALGS_EX = 22,
-        PP_ENUMMANDROOTS = 25,
-        PP_ENUMELECTROOTS = 26,
-        PP_KEYSET_TYPE = 27,
-        PP_ADMIN_PIN = 31,
-        PP_KEYEXCHANGE_PIN = 32,
-        PP_SIGNATURE_PIN = 33,
-        PP_SIG_KEYSIZE_INC = 34,
-        PP_KEYX_KEYSIZE_INC = 35,
-        PP_UNIQUE_CONTAINER = 36,
-        PP_SGC_INFO = 37,
-        PP_USE_HARDWARE_RNG = 38,
-        PP_KEYSPEC = 39,
-        PP_ENUMEX_SIGNING_PROT = 40,
-        PP_CRYPT_COUNT_KEY_USE = 41
     }
 }

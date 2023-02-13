@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Management.Automation;
 using System.Security.Cryptography.X509Certificates;
-using System.Security.Principal;
 using PSCerts.Summary;
 using PSCerts.Util;
 
@@ -53,63 +50,19 @@ namespace PSCerts.Commands
         {
             try
             {
-                var summary = new CertSummary();
                 var pkOnly = HasPrivateKey.IsPresent;
                 
-                List<StoreLocation> locations = Location.HasValue
-                    ? new () { Location.Value }
-                    : new () { StoreLocation.CurrentUser, StoreLocation.LocalMachine };
+                var locations = Location.HasValue
+                    ? new [] { Location.Value }
+                    : new [] { StoreLocation.CurrentUser, StoreLocation.LocalMachine };
 
                 var stores = Detailed.IsPresent
                     ? Enum.GetValues(typeof(StoreName)).AsList<StoreName>()
                     : Stores?.ToList() ?? new () { StoreName.My };
 
-                foreach (var location in locations)
-                foreach (var storeName in stores)
-                {
-                    var store = new X509Store(storeName, location);
+                var summary = CertHelper.GetCertSummary(locations, stores, pkOnly);
 
-                    try
-                    {
-                        store.Open(OpenFlags.ReadOnly);
-
-                        foreach (var cert in store.Certificates)
-                        {
-                            try
-                            {
-                                var summaryItem = new CertSummaryItem(store, cert);
-
-                                if (PrivateKeyHelper.TryGetPrivateKey(cert, out var privateKeyFile))
-                                {
-                                    var privateKeyInfo = new FileInfo(privateKeyFile);
-                                    summaryItem.PrivateKey = privateKeyInfo;
-
-                                    var acl = FileSystemHelper.GetAccessControl(privateKeyFile);
-                                    var rules = acl.GetAccessRules(true, true, typeof(SecurityIdentifier));
-                                    var perms = CertAccessRule.Create(rules);
-
-                                    summaryItem.Permissions = perms;
-                                }
-                                else if (pkOnly)
-                                {
-                                    continue;
-                                }
-
-                                summary.Items.Add(summaryItem);
-                            }
-                            catch (Exception ex)
-                            {
-                                WriteVerbose($"An exception occurred processing the {nameof(X509Certificate2)} with thumbprint '{cert?.Thumbprint}'. Details: {ex.Message}");
-                            }
-                        }
-                    }
-                    finally
-                    {
-                        store.Close();
-                    }
-                }
-
-                WriteObject(summary);
+                WriteObject(summary.Items, true);
             }
             catch (Exception e)
             {

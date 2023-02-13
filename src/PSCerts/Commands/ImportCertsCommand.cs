@@ -35,17 +35,26 @@ namespace PSCerts.Commands
         {
             try
             {
-                if (ParameterSetName == FROM_FILE_PARAM_SET)
+                var config = ImportConfig ?? CertConfigFactory.Load(FilePath);
+
+                var validationResult = config.Validate();
+
+                validationResult.AssertIsValid();
+
+                foreach (var certConfig in config.Certs)
                 {
-                    if (string.IsNullOrWhiteSpace(FilePath)) throw new ArgumentNullException(nameof(FilePath));
+                    certConfig.Import();
 
-                    var path = FileSystemHelper.ResolvePath(FilePath);
-                    var configText = File.ReadAllText(path.FullName);
+                    var firstStore = certConfig.Stores.First();
 
-                    var config = JsonConvert.DeserializeObject<CertImportConfig>(configText);
-                    if (config == null) throw new JsonException($"Config file format is not valid.");
+                    if (!certConfig.HasPermissions) continue;
 
-
+                    var pk = PrivateKeyHelper.GetPrivateKey(firstStore.Location, firstStore.Store, certConfig.Thumbprint, X509FindType.FindByThumbprint);
+                    if (string.IsNullOrWhiteSpace(pk)) throw new InvalidOperationException($"Private key for '{certConfig.Thumbprint}' was not found. Unable to set permissions.");
+                    foreach (var permission in certConfig.Permissions)
+                    {
+                        FileSystemHelper.AddAccessControl(pk, permission.ToAccessRule());
+                    }
                 }
             }
             catch (Exception e)

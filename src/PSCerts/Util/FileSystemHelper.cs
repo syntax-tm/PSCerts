@@ -9,17 +9,17 @@ namespace PSCerts.Util
 {
     public static class FileSystemHelper
     {
-        public static FileSecurity AddAccessControl(string fileName, string appPoolIdentity, FileSystemRights rights = FileSystemRights.Read,
+        public static FileSecurity AddAccessControl(string fileName, string identity, FileSystemRights rights = FileSystemRights.Read,
                                                     AccessControlType accessType = AccessControlType.Allow)
         {
             var fileInfo = new FileInfo(fileName);
-            return AddAccessControl(fileInfo, appPoolIdentity, rights, accessType);
+            return AddAccessControl(fileInfo, identity, rights, accessType);
         }
 
-        public static FileSecurity AddAccessControl(FileInfo fileInfo, string appPoolIdentity, FileSystemRights rights = FileSystemRights.Read,
+        public static FileSecurity AddAccessControl(FileInfo fileInfo, string identity, FileSystemRights rights = FileSystemRights.Read,
                                                     AccessControlType accessType = AccessControlType.Allow)
         {
-            var rule = new FileSystemAccessRule(appPoolIdentity, rights, accessType);
+            var rule = new FileSystemAccessRule(identity, rights, accessType);
             return AddAccessControl(fileInfo, rule);
         }
 

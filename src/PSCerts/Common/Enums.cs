@@ -21,12 +21,35 @@ public enum ErrorCode
     InvalidFormat
 }
 
+[Flags]
 public enum CertType
 {
     [Description(".pfx")]
-    PFX,
+    PFX = 1,
     [Description(".pem")]
-    PEM
+    PEM = 2,
+    [Description(".p12")]
+    P12 = 4,
+    [Description(".key")]
+    KEY = 8,
+    [Description(".keystore")]
+    KEYSTORE = 16,
+    [Description(".jks")]
+    JKS = 32,
+    [Description(".crt")]
+    CRT = 64,
+    [Description(".cer")]
+    CER = 128,
+    [Description(".ca-bundle")]
+    CA_BUNDLE = 256,
+    [Description(".p7b")]
+    P7B = 512,
+    [Description(".p7c")]
+    P7C = 1024,
+    [Description(".p7s")]
+    P7S = 2048,
+    HasPrivateKey = PFX | PEM | P12
+
 }
 
 [Flags]

@@ -19,6 +19,18 @@ namespace PSCerts
             if (other == null) return false;
             return input.Equals(other, StringComparison.InvariantCultureIgnoreCase);
         }
+        
+        public static bool Equals(this string input, string other, bool ignoreCase)
+        {
+            if (input == null) return other == null;
+            if (other == null) return false;
+
+            var comparison = ignoreCase
+                ? StringComparison.InvariantCultureIgnoreCase
+                : StringComparison.InvariantCulture;
+
+            return input.Equals(other, comparison);
+        }
 
         public static SecureString AsSecureString(this string s)
         {
@@ -96,10 +108,16 @@ namespace PSCerts
             return sid.Translate(typeof(NTAccount)).ToString();
         }
 
-        public static void ThrowTerminatingException(this Cmdlet cmdlet, Exception e)
+        public static void ThrowException(this PSCmdlet cmdlet, Exception e)
         {
             var error = ErrorHelper.CreateError(e);
             cmdlet.WriteError(error);
+        }
+
+        public static void ThrowTerminatingException(this PSCmdlet cmdlet, Exception e)
+        {
+            var error = ErrorHelper.CreateError(e);
+            cmdlet.ThrowTerminatingError(error);
         }
     }
 }
