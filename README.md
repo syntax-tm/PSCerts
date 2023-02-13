@@ -167,9 +167,11 @@ The `type` indicates how to handle the `value` property (see below).
 
 ## TODO
 
-- [ ] Finish `Add-SiteBinding`
-- [ ] Finish `Import-Certs`
-- [ ] Add Cmdlet help information
+- [x] Finish `Add-SiteBinding`
+- [x] Finish `Import-Certs`
+- [ ] Add documentation for `Add-SiteBinding`
+- [ ] Finish documentation for `Import-Certs`
+- [-] Add Cmdlet help information
 - [ ] Add unit tests
 - [ ] Add support for .NET 4.6.1 (or older)
 - [ ] Add version history, release notes, etc. to the module manifest
@@ -180,6 +182,11 @@ The `type` indicates how to handle the `value` property (see below).
 - [ ] Create documentation (wiki)
 
 ## Version History
+
+- **0.0.10**
+  - Added `Import-Certs`
+  - Private key search locations are now dependent upon the user's access (admin vs. user)
+  - Misc. cleanup
 
 - **0.0.9**
   - Updated `README.md`
