@@ -13,39 +13,21 @@ namespace PSCerts.Commands
         private const string CERT_PARAM_SET = nameof(CERT_PARAM_SET);
         private const string FIND_PARAM_SET = nameof(FIND_PARAM_SET);
 
-        [Parameter(Mandatory = true, Position = 0,
-                   ValueFromPipeline = true, ValueFromPipelineByPropertyName = true, ParameterSetName = CERT_PARAM_SET)]
+        [Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true, ParameterSetName = CERT_PARAM_SET)]
+        [ValidateNotNull]
         public X509Certificate2 Certificate { get; set; }
-
-        [Parameter(Mandatory = true, Position = 0,
-                   ValueFromPipelineByPropertyName = true, ParameterSetName = FIND_PARAM_SET)]
-        public StoreLocation StoreLocation { get; set; }
-        [Parameter(Mandatory = true, Position = 1,
-                   ValueFromPipelineByPropertyName = true, ParameterSetName = FIND_PARAM_SET)]
-        public StoreName StoreName { get; set; }
-
-        [Parameter(Mandatory = true,  Position = 2,
-                   ValueFromPipelineByPropertyName = true, ParameterSetName = FIND_PARAM_SET)]
-        [Alias("Thumbprint", "CN", "CommonName", "Subject", "SubjectName")]
+        
+        [Parameter(Mandatory = true,  Position = 0, ValueFromPipeline = true, ParameterSetName = FIND_PARAM_SET)]
+        [Alias("CertHash", "Hash")]
         [ValidateNotNullOrEmpty]
-        public string Key { get; set; }
-
-        [Parameter(Mandatory = true,
-                   Position = 3,
-                   ValueFromPipelineByPropertyName = true,
-                   ParameterSetName = FIND_PARAM_SET)]
-        public X509FindType FindType { get; set; } = X509FindType.FindByThumbprint;
-
+        public string Thumbprint { get; set; }
+        
         protected override void ProcessRecord()
         {
             try
             {
-                var privateKeyFile = ParameterSetName switch
-                {
-                    CERT_PARAM_SET => PrivateKeyHelper.GetPrivateKey(Certificate),
-                    FIND_PARAM_SET => PrivateKeyHelper.GetPrivateKey(StoreLocation, StoreName, Key, FindType),
-                    _              => throw new ArgumentException($"Unknown parameter set {ParameterSetName}."),
-                };
+                var cert = Certificate ?? CertHelper.FindCertificate(Thumbprint);
+                var privateKeyFile = PrivateKeyHelper.GetPrivateKey(cert);
                 var privateKeyInfo = new FileInfo(privateKeyFile);
 
                 WriteObject(privateKeyInfo);

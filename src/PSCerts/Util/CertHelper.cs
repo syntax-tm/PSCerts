@@ -43,6 +43,26 @@ namespace PSCerts.Util
                 store?.Close();
             }
         }
+        
+        public static X509Certificate2 FindCertificate(string thumbprint)
+        {
+            if (string.IsNullOrWhiteSpace(thumbprint)) throw new ArgumentNullException(nameof(thumbprint));
+
+            foreach (StoreLocation location in Enum.GetValues(typeof(StoreLocation)))
+            foreach (StoreName storeName in Enum.GetValues(typeof(StoreName)))
+            {
+                var store = new X509Store(storeName, location);
+                store.Open(OpenFlags.ReadOnly);
+
+                var certs = store.Certificates.Find(X509FindType.FindByThumbprint, thumbprint, false);
+
+                if (certs.Count == 0) continue;
+
+                return certs[0];
+            }
+
+            throw new KeyNotFoundException($"Unable to find certificate with thumbprint '{thumbprint}'.");
+        }
 
         public static X509Certificate2 FindCertificate(X509Store store, string thumbprint)
         {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data.Common;
 using System.IO;
 using System.Management.Automation;
@@ -30,11 +31,12 @@ namespace PSCerts.Util
                 ErrorCode = _exception switch
                 {
                     ArgumentNullException _       => ErrorCode.ArgumentMissing,
-                    FileNotFoundException _       => ErrorCode.NotFound,
                     DirectoryNotFoundException _  => ErrorCode.NotFound,
+                    FileNotFoundException _       => ErrorCode.NotFound,
+                    KeyNotFoundException          => ErrorCode.NotFound,
                     CryptographicException _      => ErrorCode.Permissions,
-                    UnauthorizedAccessException _ => ErrorCode.Permissions,
                     SecurityException _           => ErrorCode.Permissions,
+                    UnauthorizedAccessException _ => ErrorCode.Permissions,
                     JsonException     _           => ErrorCode.InvalidFormat,
                     _                             => ErrorCode.None
                 };

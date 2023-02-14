@@ -183,6 +183,9 @@ The `type` indicates how to handle the `value` property (see below).
 
 ## Version History
 
+- **0.0.11**
+  - Updated `Get-CertPrivateKey`
+
 - **0.0.10**
   - Added `Import-Certs`
   - Private key search locations are now dependent upon the user's access (admin vs. user)
