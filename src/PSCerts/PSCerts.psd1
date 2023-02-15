@@ -111,7 +111,8 @@ CmdletsToExport = @(
     'Get-CertPermissions',
     'Get-CertPrivateKey',
     'Get-CertSummary',
-    'Import-Certs'
+    'Import-Certs',
+    'Set-CertFriendlyName'
 )
 
 # Variables to export from this module

@@ -30,23 +30,30 @@ namespace PSCerts.Commands
     public class AddCertPermissionsCommand : PSCmdlet
     {
         private const string PROPS_PARAM_SET = nameof(PROPS_PARAM_SET);
-        private const string PROPS_DENY_PARAM_SET = nameof(PROPS_DENY_PARAM_SET);
         private const string ACCESS_RULE_PARAM_SET = nameof(ACCESS_RULE_PARAM_SET);
+        private const string HASH_PROPS_PARAM_SET = nameof(HASH_PROPS_PARAM_SET);
+        private const string HASH_ACCESS_RULE_PARAM_SET = nameof(HASH_ACCESS_RULE_PARAM_SET);
         
         /// <summary>
         /// The <see cref="X509Certificate2"/> with a private key to add permissions.
         /// </summary>
         [Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true, ParameterSetName = PROPS_PARAM_SET)]
-        [Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true, ParameterSetName = PROPS_DENY_PARAM_SET)]
         [Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true, ParameterSetName = ACCESS_RULE_PARAM_SET)]
         [Alias("Cert")]
         public X509Certificate2 Certificate { get; set; }
+        
+        [Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true, ParameterSetName = HASH_PROPS_PARAM_SET)]
+        [Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true, ParameterSetName = HASH_ACCESS_RULE_PARAM_SET)]
+        [Alias("CertHash", "Hash")]
+        [ValidateNotNullOrEmpty]
+        public string Thumbprint { get; set; }
         
         /// <summary>
         /// The <see cref="FileSystemAccessRule"/> to be added.
         /// </summary>
         /// <seealso cref="System.Security.AccessControl.FileSystemAccessRule" />
         [Parameter(Mandatory = true, Position = 1, ParameterSetName = ACCESS_RULE_PARAM_SET)]
+        [Parameter(Mandatory = true, Position = 1, ParameterSetName = HASH_ACCESS_RULE_PARAM_SET)]
         [Alias("FileSystemAccessRule", "AccessRule")]
         public FileSystemAccessRule Rule { get; set; }
         
@@ -58,7 +65,7 @@ namespace PSCerts.Commands
         /// <seealso cref="NTAccount"/>
         /// <example>"NETWORK SERVICE"</example>
         [Parameter(Mandatory = true, Position = 1, ParameterSetName = PROPS_PARAM_SET)]
-        [Parameter(Mandatory = true, Position = 1, ParameterSetName = PROPS_DENY_PARAM_SET)]
+        [Parameter(Mandatory = true, Position = 1, ParameterSetName = HASH_PROPS_PARAM_SET)]
         [Alias("Account", "Name", "User", "UserName")]
         public string Identity { get; set; }
         
@@ -67,7 +74,7 @@ namespace PSCerts.Commands
         /// </summary>
         /// <seealso cref="FileSystemRights"/>
         [Parameter(Mandatory = true, Position = 2, ParameterSetName = PROPS_PARAM_SET)]
-        [Parameter(Mandatory = true, Position = 2, ParameterSetName = PROPS_DENY_PARAM_SET)]
+        [Parameter(Mandatory = true, Position = 2, ParameterSetName = HASH_PROPS_PARAM_SET)]
         [Alias("Rights", "Permissions")]
         public FileSystemRights FileSystemRights { get; set; }
         
@@ -76,31 +83,24 @@ namespace PSCerts.Commands
         /// </summary>
         /// <remarks>The default type is <c>Allow</c>.</remarks>
         /// <seealso cref="AccessControlType"/>
-        [Parameter(Mandatory = true, Position = 3, ParameterSetName = PROPS_PARAM_SET)]
+        [Parameter(Position = 3, ParameterSetName = PROPS_PARAM_SET)]
+        [Parameter(Position = 3, ParameterSetName = HASH_PROPS_PARAM_SET)]
         [Alias("Access", "Type")]
         public AccessControlType AccessType { get; set; } = AccessControlType.Allow;
-
-        /// <summary>
-        /// Adds a <see cref="AccessControlType.Deny" /> <see cref="FileSystemAccessRule"/>.
-        /// </summary>
-        [Parameter(Position = 3, ParameterSetName = PROPS_DENY_PARAM_SET)]
-        public SwitchParameter Deny { get; set; }
 
         protected override void ProcessRecord()
         {
             try
             {
-                var privateKeyFile = PrivateKeyHelper.GetPrivateKey(Certificate);
-                var access = Deny.IsPresent
-                    ? AccessControlType.Deny
-                    : AccessType;
-                
+                var cert = Certificate ?? CertHelper.FindCertificate(Thumbprint);
+                var privateKeyFile = PrivateKeyHelper.GetPrivateKey(cert);
                 var rule = ParameterSetName switch
                 {
                     PROPS_PARAM_SET or
-                    PROPS_DENY_PARAM_SET  => new (Identity, FileSystemRights, access),
-                    ACCESS_RULE_PARAM_SET => Rule,
-                    _                     => throw new ArgumentException($"Unknown {nameof(ParameterSetName)} {ParameterSetName}.")
+                    HASH_PROPS_PARAM_SET       => new (Identity, FileSystemRights, AccessType),
+                    ACCESS_RULE_PARAM_SET or
+                    HASH_ACCESS_RULE_PARAM_SET => Rule,
+                    _                          => throw new ArgumentException($"Unknown {nameof(ParameterSetName)} {ParameterSetName}.")
                 };
                 
                 var acl = FileSystemHelper.AddAccessControl(privateKeyFile, rule);
