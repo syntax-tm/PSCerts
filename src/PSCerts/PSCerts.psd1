@@ -19,7 +19,7 @@ else # Desktop
 }
 
 # Version number of this module.
-ModuleVersion = '0.0.11'
+ModuleVersion = '0.0.13'
 
 # Supported PSEditions (PS 5.1+)
 # CompatiblePSEditions = @('Desktop','Core')
@@ -34,7 +34,7 @@ Author = 'syntax-tm'
 Description = 'Powershell module for managing certificates'
 
 # Minimum version of the PowerShell engine required by this module
-# PowerShellVersion = ''
+PowerShellVersion = '5.0'
 
 # Name of the PowerShell host required by this module
 # PowerShellHostName = ''
@@ -43,7 +43,7 @@ Description = 'Powershell module for managing certificates'
 # PowerShellHostVersion = ''
 
 # Minimum version of Microsoft .NET Framework required by this module. This prerequisite is valid for the PowerShell Desktop edition only.
-DotNetFrameworkVersion = '4.7.2'
+DotNetFrameworkVersion = '4.6.2'
 
 # Minimum version of the common language runtime (CLR) required by this module. This prerequisite is valid for the PowerShell Desktop edition only.
 # ClrVersion = ''

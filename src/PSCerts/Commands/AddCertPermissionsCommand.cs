@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Diagnostics;
-using System.IO;
 using System.Management.Automation;
-using System.Management.Automation.Runspaces;
 using System.Security.AccessControl;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -27,7 +24,7 @@ namespace PSCerts.Commands
     /// <seealso cref="RSA" />
     [Cmdlet(VerbsCommon.Add, "CertPermissions", DefaultParameterSetName = PROPS_PARAM_SET)]
     [OutputType(typeof(FileSecurity))]
-    public class AddCertPermissionsCommand : PSCmdlet
+    public class AddCertPermissionsCommand : CmdletBase
     {
         private const string PROPS_PARAM_SET = nameof(PROPS_PARAM_SET);
         private const string ACCESS_RULE_PARAM_SET = nameof(ACCESS_RULE_PARAM_SET);

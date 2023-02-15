@@ -21,8 +21,8 @@ if ($global:BuildStatusCode -ne 0) { return }
 
 # copy everything from the publish directory to the testing directory
 # that way we're still able to build
-Remove-Item $testPath -Recurse -ErrorAction Ignore
-Copy-Item $publishPath -Destination $testPath -Recurse -Container:$false
+Remove-Item $testPath -Recurse -Force -ErrorAction Ignore
+Copy-Item $publishPath -Destination $testPath -Force -Recurse -Container:$false
 
 # import the module from the testing directory
 Import-Module $modulePath -Verbose
@@ -34,19 +34,19 @@ Write-Host "`n$b$black[$whiteb`TEST$black]$r $fmt_acc$b`Get-CertSummary$r"
 
 # test summary cmdlet + format
 $summary = Get-CertSummary
-$summary | Out-Host
+$summary #| Out-Host
 
 Write-Host "`n$b$black[$whiteb`TEST$black]$r $fmt_acc$b`Get-CertPrivateKey$r"
 
 # test get-privatekey  cmdlet
 $cert = Get-Item Cert:\LocalMachine\My\10DF834FC47DDFC4D069D2E4FE79E4BF1D6D4DAE # PSCerts_01.pfx
 $certPk = Get-CertPrivateKey $cert
-$certPk | Select-Object -Property Directory, Name | Out-Host
+$certPk | Select-Object -Property Directory, Name #| Out-Host
 
 Write-Host "`n$b$black[$whiteb`TEST$black]$r $fmt_acc$b`CertAccessRule Format$r"
 
 # test permission format
 $perms = $summary | Where-Object { $_.Permissions.Count -gt 0  } | Select-Object -ExpandProperty Permissions -First 1
-$perms | Out-Host
+$perms #| Out-Host
 
 #Remove-TestCerts

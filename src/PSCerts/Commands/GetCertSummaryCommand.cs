@@ -16,7 +16,7 @@ namespace PSCerts.Commands
     [Cmdlet(VerbsCommon.Get, "CertSummary", DefaultParameterSetName = DEFAULT_PARAM_SET)]
     [OutputType(typeof(CertSummary))]
     //[OutputType(typeof(List<CertSummary>))]
-    public class GetCertSummaryCommand : PSCmdlet
+    public class GetCertSummaryCommand : CmdletBase
     {
         private const string DEFAULT_PARAM_SET = nameof(DEFAULT_PARAM_SET);
         private const string CUSTOM_PARAM_SET = nameof(CUSTOM_PARAM_SET);

@@ -4,7 +4,7 @@
   <PropertyGroup>
     <AssemblyName>PSCerts</AssemblyName>
     <LangVersion>preview</LangVersion>
-    <TargetFrameworks>net472;netstandard2.0;net7.0-windows</TargetFrameworks>
+    <TargetFrameworks>net472;net462;netstandard2.0;net7.0-windows</TargetFrameworks>
     <Title>PSCerts</Title>
     <Description>Powershell module for managing certificates</Description>
     <PackageProjectUrl>https://github.com/syntax-tm/PSCerts</PackageProjectUrl>
@@ -35,6 +35,7 @@
     <PackageReference Include="JsonSubTypes" Version="2.0.1" />
     <PackageReference Include="Microsoft.Win32.Registry" Version="6.0.0-preview.5.21301.5" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3-beta1" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="7.0.1" />
     <PackageReference Include="System.Linq" Version="4.3.0" />
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
     <!-- ReSharper disable VulnerablePackage -->

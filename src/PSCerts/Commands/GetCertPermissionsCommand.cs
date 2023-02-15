@@ -9,7 +9,7 @@ namespace PSCerts.Commands
 {
     [Cmdlet(VerbsCommon.Get, "CertPermissions")]
     [OutputType(typeof(List<CertAccessRule>))]
-    public class GetCertPermissionsCommand : PSCmdlet
+    public class GetCertPermissionsCommand : CmdletBase
     {
         [Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true, ValueFromPipelineByPropertyName = true)]
         [Alias("Cert", "InputObject")]

@@ -8,7 +8,7 @@ namespace PSCerts.Commands
 {
     [Cmdlet(VerbsCommon.Get, "CertPrivateKey", DefaultParameterSetName = CERT_PARAM_SET)]
     [OutputType(typeof(FileInfo))]
-    public class GeCertPrivateKeyCommand : PSCmdlet
+    public class GeCertPrivateKeyCommand : CmdletBase
     {
         private const string CERT_PARAM_SET = nameof(CERT_PARAM_SET);
         private const string FIND_PARAM_SET = nameof(FIND_PARAM_SET);

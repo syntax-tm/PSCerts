@@ -1,16 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Management.Automation;
-using System.Management.Automation.Runspaces;
-using System.Security;
-using System.Security.AccessControl;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.Security.Principal;
-using Newtonsoft.Json;
 using PSCerts.Config;
 using PSCerts.Util;
 
@@ -18,7 +9,7 @@ namespace PSCerts.Commands
 {
     [Cmdlet(VerbsData.Import, "CertConfig")]
     //[OutputType(typeof(List<CertSummary>))]
-    public class ImportCertsCommand : PSCmdlet
+    public class ImportCertsCommand : CmdletBase
     {
         private const string FROM_FILE_PARAM_SET = nameof(FROM_FILE_PARAM_SET);
         private const string FROM_CONFIG_PARAM_SET = nameof(FROM_CONFIG_PARAM_SET);

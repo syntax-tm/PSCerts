@@ -54,7 +54,7 @@ class TestCert
             $cert = [X509Certificate2]::new($this.FullName, $securePassword, $storageFlags)
             $this.Certificate = $cert
             $this.Thumbprint = $cert.Thumbprint
-            $this._importedPath = Join-Path "Cert:" $this.Location $this.Store $cert.Thumbprint
+            $this._importedPath = "Cert:\$($this.Location)\$($this.Store)$($cert.Thumbprint)"
             $this._certLoaded = $true
 
             Write-Verbose "Certificate '$($this.Name)' ($($this.Thumbprint)) loaded successfully."
@@ -89,12 +89,13 @@ class TestCert
 
         try
         {
-            $certStore = Get-Item "Cert:\$($this.Location)\$($this.Store)"
+            $certStore = [X509Store]::new($this.Store, $this.Location)
+            $certStore.Open('ReadWrite')
             $certStore.Add($this.Certificate)
         }
         finally
         {
-            if ($certStore.IsOpen) { $certStore.Close() }
+            if ($null -ne $certStore -and $certStore.IsOpen) { $certStore.Close() }
         }
     }
 
@@ -169,7 +170,7 @@ public static extern bool GetConsoleMode(IntPtr handle, out int mode);
 # older terminals require manually enabling support for ANSI
 if ($PSEdition -eq "Desktop")
 {
-    Enable-ANSIEscapes
+    #Enable-ANSIEscapes
 }
 
 $cyan        = $PSStyle.Foreground.Cyan

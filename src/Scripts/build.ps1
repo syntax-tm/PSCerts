@@ -9,7 +9,7 @@ $ErrorActionPreference = 'Stop'
 
 $frameworks = [hashtable]@{
     coreclr = "netstandard2.0"
-    clr     = "net472"
+    clr     = "net462" # "net472"
 }
 
 $slnRoot = Split-Path $PSScriptRoot

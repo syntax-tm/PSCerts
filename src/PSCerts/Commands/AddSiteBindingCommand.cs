@@ -1,11 +1,8 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using System.Management.Automation;
-using System.Management.Automation.Runspaces;
 using System.Security;
 using System.Security.AccessControl;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Web.Administration;
 using PSCerts.Util;
@@ -14,7 +11,7 @@ namespace PSCerts.Commands
 {
     [Cmdlet(VerbsCommon.Add, "SiteBinding", DefaultParameterSetName = CERT_PARAM_SET)]
     [OutputType(typeof(CertBinding))]
-    public class AddSiteBindingCommand : PSCmdlet
+    public class AddSiteBindingCommand : CmdletBase
     {
         private const string CERT_PARAM_SET = nameof(CERT_PARAM_SET);
         private const string FROM_FILE_SET = nameof(FROM_FILE_SET);
@@ -91,16 +88,6 @@ namespace PSCerts.Commands
                 store.Add(cert);
 
                 store.Close();
-
-                store = new (Store, StoreLocation.LocalMachine);
-                store.Open(OpenFlags.ReadWrite | OpenFlags.OpenExistingOnly);
-                // reload the certificate using the thumbprint after saving it to the store
-                var certs = store.Certificates.Find(X509FindType.FindByThumbprint, thumbprint, false);
-
-                if (certs.Count == 0) throw new InvalidOperationException($"Unable to locate the {nameof(X509Certificate2)} after adding to the {nameof(X509Store)}.");
-                if (certs.Count > 1) throw new InvalidOperationException($"More than one {nameof(X509Certificate2)} was returned after adding to the {nameof(X509Store)}.");
-
-                cert = certs[0];
 
                 var pk = PrivateKeyHelper.GetPrivateKey(cert);
                 var mgr = new ServerManager();
