@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Management.Automation;
-using System.Security.Cryptography.X509Certificates;
 using PSCerts.Config;
 using PSCerts.Util;
 
@@ -40,7 +39,7 @@ namespace PSCerts.Commands
 
                     if (!certConfig.HasPermissions) continue;
 
-                    var pk = PrivateKeyHelper.GetPrivateKey(firstStore.Location, firstStore.Store, certConfig.Thumbprint, X509FindType.FindByThumbprint);
+                    var pk = PrivateKeyHelper.GetPrivateKey(certConfig.Thumbprint);
                     if (string.IsNullOrWhiteSpace(pk)) throw new InvalidOperationException($"Private key for '{certConfig.Thumbprint}' was not found. Unable to set permissions.");
                     foreach (var permission in certConfig.Permissions)
                     {

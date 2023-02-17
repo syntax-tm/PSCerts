@@ -19,7 +19,7 @@ else # Desktop
 }
 
 # Version number of this module.
-ModuleVersion = '0.0.13'
+ModuleVersion = '@MODULE_VERSION@'
 
 # Supported PSEditions (PS 5.1+)
 # CompatiblePSEditions = @('Desktop','Core')
@@ -150,7 +150,7 @@ PrivateData = @{
         IconUri = 'https://github.com/syntax-tm/PSCerts/raw/master/images/PSCerts.ico'
 
         # ReleaseNotes of this module
-        # ReleaseNotes = ''
+        ReleaseNotes = '@RELEASE_NOTES@'
 
         # Prerelease string of this module
         # Prerelease = ''

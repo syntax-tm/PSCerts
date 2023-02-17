@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.AccessControl;
+using System.Security.Principal;
 using System.Text;
 
 namespace PSCerts.Util
@@ -50,6 +51,23 @@ namespace PSCerts.Util
 #else
             fileInfo.SetAccessControl(acl);
 #endif
+        }
+
+        public static AuthorizationRuleCollection GetAccessRules(string fileName)
+        {
+            var fi = new FileInfo(fileName);
+            return GetAccessRules(fi);
+        }
+
+        public static AuthorizationRuleCollection GetAccessRules(FileInfo fileInfo)
+        {
+#if NETFRAMEWORK
+            var acl = File.GetAccessControl(fileInfo.FullName, AccessControlSections.All);
+#else
+            var acl = fileInfo.GetAccessControl(AccessControlSections.All);
+#endif
+            var rules = acl.GetAccessRules(true, true, typeof(NTAccount));
+            return rules;
         }
 
         public static FileSecurity GetAccessControl(string fileName)

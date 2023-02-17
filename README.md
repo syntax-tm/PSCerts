@@ -48,14 +48,15 @@ If you are developing in VSCode, which is recommnded, you can configure the Powe
 
 ### Add-CertPermissions
 
-Adds a [FileSystemAccessRule](https://learn.microsoft.com/en-us/dotnet/api/system.security.accesscontrol.filesystemaccessrule) to the access control and audit security for a certificate's private key file.
+Adds a [FileSystemAccessRule](https://learn.microsoft.com/en-us/dotnet/api/system.security.accesscontrol.filesystemaccessrule) to a certificate's private key.
 
 **Usage:**
 
 ```powershell
 Add-CertPermissions [-Certificate] <X509Certificate2> [-Identity] <string> [-FileSystemRights] <FileSystemRights> [-AccessType] <AccessControlType>
-Add-CertPermissions [-Certificate] <X509Certificate2> [-Identity] <string> [-FileSystemRights] <FileSystemRights> [-Deny]
 Add-CertPermissions [-Certificate] <X509Certificate2> [-Rule] <FileSystemAccessRule>
+Add-CertPermissions [-Thumbprint] <string> [-Identity] <string> [-FileSystemRights] <FileSystemRights> [-AccessType] <AccessControlType>
+Add-CertPermissions [-Thumbprint] <string> [-Rule] <FileSystemAccessRule>
 ```
 
 **Examples:**
@@ -63,6 +64,9 @@ Add-CertPermissions [-Certificate] <X509Certificate2> [-Rule] <FileSystemAccessR
 ```powershell
 $cert = Get-Item Cert:\LocalMachine\My\10df834fc47ddfc4d069d2e4fe79e4bf1d6d4dae
 Add-CertPermissions -Certificate $cert -Identity "Network Service" -FileSystemRights FullControl -AccessType Allow
+
+
+Add-CertPermissions -Thumbprint "10df834fc47ddfc4d069d2e4fe79e4bf1d6d4dae" -Identity "Network Service" -FileSystemRights FullControl -AccessType Allow
 ```
 
 **Returns:** [FileSecurity](https://learn.microsoft.com/en-us/dotnet/api/system.security.accesscontrol.filesecurity?view=net-7.0)
@@ -96,7 +100,7 @@ Determines the name and location of the certificate's private key.
 
 ```powershell
 Get-CertPrivateKey [-Certificate] <X509Certificate2>
-Get-CertPrivateKey [-StoreLocation] <StoreLocation> [-StoreName] <StoreName> [-Key] <string> [-FindType] <X509FindType>
+Get-CertPrivateKey [-Thumbprint] <string>
 ```
 
 **Examples:**
@@ -108,27 +112,46 @@ Get-CertPrivateKey -Certificate $cert
 
 **Returns:** [FileInfo](https://learn.microsoft.com/en-us/dotnet/api/system.io.fileinfo?view=net-7.0)
 
+---
+
 ### Get-CertSummary
 
-Returns information about installed certificates including the `Subject`, `Thumbprint`, `StoreLocation`, `Store`, private key name and path, permissions, and more. The return value can be used for further processing or displayed in the console.
+Returns information about the currently installed certificates.
 
 **Usage:**
 
 ```powershell
-Get-CertSummary [[-Location] <StoreLocation>] [-HasPrivateKey]
-Get-CertSummary [[-Location] <StoreLocation>] [[-Stores] <StoreName[]>] [-HasPrivateKey]
-Get-CertSummary [[-Location] <StoreLocation>] [-Detailed] [-HasPrivateKey]
+Get-CertSummary
 ```
 
 **Examples:**
 
 ```powershell
 Get-CertSummary
-Get-CertSummary -Location LocalMachine
-Get-CertSummary -Detailed
 ```
 
 **Returns:** [List\<CertSummaryItem>](/src/PSCerts/Models/Summary/CertSummaryItem.cs)
+
+---
+
+### Set-CertFriendlyName
+
+Updates the `FriendlyName` of an `X509Certificate2`.
+
+**Usage:**
+
+```powershell
+Set-CertFriendlyName [-Certificate] <X509Certificate2> [-FriendlyName] <string>
+Set-CertFriendlyName [-Thumbprint] <string> [-FriendlyName] <string>
+```
+
+**Examples:**
+
+```powershell
+Set-CertFriendlyName -Thumbprint "10df834fc47ddfc4d069d2e4fe79e4bf1d6d4dae" -FriendlyName "My Test Cert"
+```
+
+**Returns:** [X509Certificate2](https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.x509certificates.x509certificate2?view=net-7.0)
 
 ---
 
@@ -165,7 +188,7 @@ The `type` indicates how to handle the `value` property (see below).
 
 </details>
 
-## TODO
+## Backlog
 
 - [x] Finish `Add-SiteBinding`
 - [x] Finish `Import-Certs`
@@ -173,25 +196,18 @@ The `type` indicates how to handle the `value` property (see below).
 - [ ] Finish documentation for `Import-Certs`
 - [-] Add Cmdlet help information
 - [ ] Add unit tests
-- [ ] Add support for .NET 4.6.1 (or older)
+- [x] Add support for .NET 4.6.2(or older)
 - [ ] Add version history, release notes, etc. to the module manifest
 - [ ] Move non-Cmdlet code to a separate project
 - [ ] Create NuGet package for the core functionality
 - [ ] Come up with better names for the model classes (and others)
-- [ ] Move [Version History](#version-history) to its own file
+- [x] Move [Version History](/CHANGELOG.txt) to its own file
 - [ ] Create documentation (wiki)
 
-## Version History
+## Reference
 
-- **0.0.11**
-  - Updated `Get-CertPrivateKey`
+- [Version History](/CHANGELOG.txt)
 
-- **0.0.10**
-  - Added `Import-Certs`
-  - Private key search locations are now dependent upon the user's access (admin vs. user)
-  - Misc. cleanup
+## Additional Resources
 
-- **0.0.9**
-  - Updated `README.md`
-  - Fixed ACLs on Windows PowerShell
-  - Misc. cleanup
+- [Key Storage and Retrieval](https://learn.microsoft.com/en-us/windows/win32/seccng/key-storage-and-retrieval)

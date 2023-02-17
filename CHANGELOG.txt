@@ -1,0 +1,32 @@
+v0.0.14
+
+- Improved private key file search
+- Updated `README.md`
+
+v0.0.13
+
+- Added `Set-CertFriendlyName`
+- Updated `Add-CertPermissions`
+
+v0.0.12
+
+- Added support for .NET Framework 4.6.2
+
+v0.0.11
+
+- Updated `Get-CertPrivateKey`
+
+v0.0.10
+
+- Added `Import-Certs`
+- Added `Add-SiteBinding`
+- Added XML documentation
+- Updated `Get-CertSummary`
+- Updated `README.md`
+
+v0.0.9
+
+- Added `LICENSE`
+- Added `CHANGELOG.md`
+- Fixed ACLs on Windows PowerShell
+- Misc. cleanup

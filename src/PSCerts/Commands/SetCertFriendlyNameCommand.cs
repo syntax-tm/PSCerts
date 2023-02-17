@@ -20,7 +20,7 @@ namespace PSCerts.Commands
     /// <seealso cref="X509Certificate2" />
     /// <seealso cref="X509Certificate2.FriendlyName" />
     [Cmdlet(VerbsCommon.Set, "CertFriendlyName", DefaultParameterSetName = CERT_PARAM_SET)]
-    [OutputType(typeof(FileSecurity))]
+    [OutputType(typeof(X509Certificate2))]
     public class SetCertFriendlyNameCommand : CmdletBase
     {
         private const string CERT_PARAM_SET = nameof(CERT_PARAM_SET);

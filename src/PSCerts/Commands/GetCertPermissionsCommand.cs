@@ -20,8 +20,7 @@ namespace PSCerts.Commands
             try
             {
                 var privateKeyFile = PrivateKeyHelper.GetPrivateKey(Certificate);
-                var acl = FileSystemHelper.GetAccessControl(privateKeyFile);
-                var rules = acl.GetAccessRules(true, true, typeof(SecurityIdentifier));
+                var rules = FileSystemHelper.GetAccessRules(privateKeyFile);
                 var perms = CertAccessRule.Create(rules);
             
                 WriteObject(perms, false);

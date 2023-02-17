@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.AccessControl;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
 using PSCerts.Summary;
@@ -74,47 +75,44 @@ namespace PSCerts.Util
             return matches[0];
         }
 
-        public static CertSummary GetCertSummary(IList<StoreLocation> locations, IList<StoreName> stores, bool pkOnly = false)
+        public static CertSummary GetCertSummary()
         {
             var summary = new CertSummary();
             
+            var locations = new [] { StoreLocation.LocalMachine, StoreLocation.CurrentUser };
+            var stores = Enum.GetValues(typeof(StoreName)).Cast<StoreName>();
+
             foreach (var location in locations)
             foreach (var storeName in stores)
             {
-                var store = new X509Store(storeName, location);
+                X509Store store = null;
 
                 try
                 {
+                    store = new X509Store(storeName, location);
                     store.Open(OpenFlags.ReadOnly);
 
                     foreach (var cert in store.Certificates)
                     {
-                        try
+                        var summaryItem = new CertSummaryItem(store, cert);
+
+                        if (PrivateKeyHelper.TryGetPrivateKey(cert, out var privateKeyFile))
                         {
-                            var summaryItem = new CertSummaryItem(store, cert);
+                            var privateKeyInfo = new FileInfo(privateKeyFile);
+                            summaryItem.PrivateKey = privateKeyInfo;
 
-                            if (PrivateKeyHelper.TryGetPrivateKey(cert, out var privateKeyFile))
+                            var acl = FileSystemHelper.GetAccessControl(privateKeyFile);
+
+                            try
                             {
-                                var privateKeyInfo = new FileInfo(privateKeyFile);
-                                summaryItem.PrivateKey = privateKeyInfo;
-
-                                var acl = FileSystemHelper.GetAccessControl(privateKeyFile);
-                                var rules = acl.GetAccessRules(true, true, typeof(SecurityIdentifier));
+                                var rules = acl.GetAccessRules(true, true, typeof(NTAccount));
                                 var perms = CertAccessRule.Create(rules);
-
                                 summaryItem.Permissions = perms;
                             }
-                            else if (pkOnly)
-                            {
-                                continue;
-                            }
+                            catch { }
+                        }
 
-                            summary.Items.Add(summaryItem);
-                        }
-                        catch
-                        {
-                            // TODO: log these exceptions to either verbose or warning stream
-                        }
+                        summary.Items.Add(summaryItem);
                     }
                 }
                 finally
