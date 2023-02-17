@@ -132,6 +132,8 @@ namespace PSCerts.Util
 
             foreach (var location in KeyContainers)
             {
+                if (!Directory.Exists(location)) continue;
+
                 var results = Directory.GetFiles(location, $"*{keyName}*", SearchOption.AllDirectories);
                 if (!results.Any()) continue;
                 return results.Single();

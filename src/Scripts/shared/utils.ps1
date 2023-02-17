@@ -8,6 +8,72 @@ using namespace System.Security.Cryptography.X509Certificates
 [string]$script:SlnRoot = Split-Path $ScriptsPath
 [string]$script:CertResourcesPath = Join-Path $SlnRoot "resources\certs"
 
+[string]$moduleVersionToken = "@MODULE_VERSION@"
+[string]$releaseNotesToken = "@RELEASE_NOTES@"
+
+$cyan = $PSStyle.Foreground.Cyan
+$cyanb = $PSStyle.Foreground.BrightCyan
+$green = $PSStyle.Foreground.Green
+$greenb = $PSStyle.Foreground.BrightGreen
+$red = $PSStyle.Foreground.Red
+$redb = $PSStyle.Foreground.BrightRed
+$magenta = $PSStyle.Foreground.Magenta
+$magentab = $PSStyle.Foreground.BrightMagenta
+$blue = $PSStyle.Foreground.Blue
+$blueb = $PSStyle.Foreground.BrightBlue
+$yellow = $PSStyle.Foreground.Yellow
+$yellowb = $PSStyle.Foreground.BrightYellow
+$black = $PSStyle.Foreground.Black
+$blackb = $PSStyle.Foreground.BrightBlack
+$white = $PSStyle.Foreground.White
+$whiteb = $PSStyle.Foreground.BrightWhite
+
+$bg_cyan = $PSStyle.Background.Cyan
+$bg_cyanb = $PSStyle.Background.BrightCyan
+$bg_green = $PSStyle.Background.Green
+$bg_bgreen = $PSStyle.Background.BrightGreen
+$bg_red = $PSStyle.Background.Red
+$bg_redb = $PSStyle.Background.BrightRed
+$bg_magenta = $PSStyle.Background.Magenta
+$bg_magentab = $PSStyle.Background.BrightMagenta
+$bg_blue = $PSStyle.Background.Blue
+$bg_blueb = $PSStyle.Background.BrightBlue
+$bg_yellow = $PSStyle.Background.Yellow
+$bg_yellowb = $PSStyle.Background.BrightYellow
+$bg_black = $PSStyle.Background.Black
+$bg_blackb = $PSStyle.Background.BrightBlack
+$bg_white = $PSStyle.Background.White
+$bg_whiteb = $PSStyle.Background.BrightWhite
+
+$inv = $PSStyle.Reverse
+$inv_off = $PSStyle.ReverseOff
+
+$b = $PSStyle.Bold
+$b_off = $PSStyle.BoldOff
+$bo = $bo
+
+$i = $PSStyle.Italic
+$i_off = $PSStyle.ItalicOff
+$io = $io
+
+$u = $PSStyle.Underline
+$u_off = $PSStyle.UnderlineOff
+$uo = $uo_off
+
+$s = $PSStyle.Strikethrough
+$s_off = $PSStyle.StrikethroughOff
+$so = $s_off
+
+$th = $PSStyle.Formatting.TableHeader
+$fmt_acc = $PSStyle.Formatting.FormatAccent
+$cc = $fmt_acc
+$err_acc = $PSStyle.Formatting.ErrorAccent
+$err = $err_acc
+$warn = $PSStyle.Formatting.Warning
+
+$r = $PSStyle.Reset
+$fr = "$inv_off$bo$io$uo$so$r"
+
 class TestCert
 {
     hidden [bool]$_certLoaded
@@ -132,126 +198,152 @@ function Remove-TestCerts()
     }
 }
 
-function Enable-ANSIEscapes
+$module = 'PSCerts'
+$repoRoot = Split-Path $script:SlnRoot
+$publishPath = Join-Path $script:SlnRoot "publish"
+
+$moduleFileName = "$module.psm1"
+$manifestFileName = "$module.psd1"
+$manifestPath = Join-Path $publishPath $manifestFileName
+$changelogFileName = "CHANGELOG.txt"
+$changelogPath = Join-Path $repoRoot $changelogFileName
+
+$moduleVersionToken = "@MODULE_VERSION@"
+$releaseNotesToken = "@RELEASE_NOTES@"
+
+function Update-Version
 {
-    # Enable ANSI / VT100 16-color escape sequences:
-    # Original discovery blog post:
-    # http://stknohg.hatenablog.jp/entry/2016/02/22/195644
-    # Esc sequence support documentation
-    # https://msdn.microsoft.com/en-us/library/windows/desktop/mt638032(v=vs.85).aspx
+    [OutputType([bool])]
+    param(
+        [Parameter(Mandatory = $true, Position = 0)]
+        [string]$Path,
+        [switch]$SkipConfirmation,
+        [switch]$Testing
+    )
 
-    # This doesn't do anything if the type is already added, so don't worry
-    # about doing this every single time, I guess
-    Add-Type -MemberDefinition @"
-[DllImport("kernel32.dll", SetLastError=true)]
-public static extern bool SetConsoleMode(IntPtr hConsoleHandle, int mode);
-[DllImport("kernel32.dll", SetLastError=true)]
-public static extern IntPtr GetStdHandle(int handle);
-[DllImport("kernel32.dll", SetLastError=true)]
-public static extern bool GetConsoleMode(IntPtr handle, out int mode);
-"@ -Namespace Win32 -Name NativeMethods
+    $manifestContent = Get-Content $Path -Raw
 
-    # GetStdHandle: https://msdn.microsoft.com/en-us/library/windows/desktop/ms683231(v=vs.85).aspx
-    # -11 is the code for STDOUT (-10 is STDIN, -12 is STDERR)
-    $Handle = [Win32.NativeMethods]::GetStdHandle(-11)
+    if (!$manifestContent.Contains($moduleVersionToken))
+    {
+        Write-Host "`n$redb$inv[ERROR]$inv_off$r " -NoNewline
+        Write-Host "$redb`Unable to find the $cyanb`ModuleVersion$redb token in the manifest. Exiting...`n$r"
+        return
+    }
 
-    # GetConsoleMode: https://msdn.microsoft.com/en-us/library/windows/desktop/ms683167(v=vs.85).aspx
-    # get the console "mode" --- contains info about how to handle
-    # wrapping, etc. $Mode is set by reference by GetConsoleMode
-    $Mode = 0
-    [Win32.NativeMethods]::GetConsoleMode($Handle, [ref]$Mode)
-    # the mode is a bitmask so we binary or with 0x0004
-    # (ENABLE_VIRTUAL_TERMINAL_PROCESSING)
+    if ($Testing)
+    {
+        $manifestContent = $manifestContent -replace $moduleVersionToken, '99.99.999'
+        [System.IO.File]::WriteAllText($Path, $manifestContent)
 
-    # SetConsoleMode: https://msdn.microsoft.com/en-us/library/windows/desktop/ms686033(v=vs.85).aspx
-    return [Win32.NativeMethods]::SetConsoleMode($Handle, $Mode -bor 4)
+        return $true
+    }
+
+    $currentVersionText = (Find-Module PSCerts -Repository PSGallery).Version
+    $currentVersion = [System.Version]::Parse($currentVersionText)
+
+    $newMajor = $currentVersion.Major
+    $newMinor = $currentVersion.Minor
+    $newBuild = $currentVersion.Build
+    $newRevision = $currentVersion.Revision
+
+    [version]$newVersion
+
+    # increment the smallest build component
+    if ($currentVersion.Revision -ge 0)
+    {
+        $newRevision++
+        $newVersion = [version]::new($newMajor, $newMinor, $newBuild, $newRevision)
+    }
+    elseif ($currentVersion.Build -ge 0)
+    {
+        $newBuild++
+        $newVersion = [version]::new($newMajor, $newMinor, $newBuild)
+    }
+    elseif ($currentVersion.Minor -ge 0)
+    {
+        $newMinor++
+        $newVersion = [version]::new($newMajor, $newMinor)
+    }
+    else
+    {
+        $newMajor++
+        $newVersion = [version]::new($newMajor)
+    }
+
+    if (!$SkipConfirmation)
+    {
+        $title = 'Update Version'
+        $question = "`nVersion '$cyanb$currentVersion$r' will be updated to '$cyanb$newVersion$r'. Are you sure you want to proceed?"
+        $choices = '&Yes', '&No'
+
+        $decision = $Host.UI.PromptForChoice($title, $question, $choices, 1)
+        if ($decision -ne 0)
+        {
+            Write-Host "`n$yellowb`User requested cancellation. Exiting...`n$r"
+            return $false
+        }
+    }
+
+    $manifestContent = $manifestContent -replace $moduleVersionToken, $newVersion
+
+    [System.IO.File]::WriteAllText($Path, $manifestContent)
+
+    return $true
 }
 
-# older terminals require manually enabling support for ANSI
-if ($PSEdition -eq "Desktop")
+function Update-Manifest
 {
-    #Enable-ANSIEscapes
+    [OutputType([bool])]
+    param(
+        [string]$Path,
+        [switch]$SkipReleaseNotes,
+        [switch]$SkipConfirmation,
+        [switch]$Testing
+    )
+
+    if (-not (Test-Path $Path))
+    {
+        Write-Host "`n$yellowb$inv[WARN] $inv_off$r" -NoNewline
+        Write-Host "$yellowb`The published module file '$cyanb$Path$r$yellowb' does not exist. Was '$cyanb`build.ps1$yellowb' run?`n$r"
+        return $false
+    }
+
+    $versionSuccess = Update-Version -Path $Path -SkipConfirmation:$SkipConfirmation -Testing:$Testing
+    if (!$versionSuccess) {
+        return $false
+    }
+
+    $manifestContent = [System.IO.File]::ReadAllText($Path)
+
+    if (!$Testing -and !$SkipReleaseNotes)
+    {
+        if (!$manifestContent.Contains($releaseNotesToken))
+        {
+            Write-Host "`n$redb$inv[ERROR]$inv_off$r " -NoNewline
+            Write-Host "$redb`Unable to find the $cyanb`ReleaseNotes$redb token in the manifest. Exiting...`n$r"
+            return $false
+        }
+
+        if (!(Test-Path $changelogPath))
+        {
+            Write-Host "`n$redb$inv[ERROR]$inv_off$r " -NoNewline
+            Write-Host "$redb`Release notes file '$cyanb$changelogFileName$redb' not found. Exiting...`n$r"
+            return $false
+        }
+
+        $changelogContent = [System.IO.File]::ReadAllText($changelogPath)
+
+        if ([string]::IsNullOrWhiteSpace($changelogContent))
+        {
+            Write-Host "`n$redb$inv[ERROR]$inv_off$r " -NoNewline
+            Write-Host "$redb`Release notes are required. Exiting...`n$r"
+            return $false
+        }
+
+        $manifestContent = $manifestContent -replace $releaseNotesToken, $changelogContent
+
+        [System.IO.File]::WriteAllText($Path, $manifestContent)
+    }
+
+    return $true
 }
-
-$cyan        = $PSStyle.Foreground.Cyan
-$cyanb       = $PSStyle.Foreground.BrightCyan
-$green       = $PSStyle.Foreground.Green
-$greenb      = $PSStyle.Foreground.BrightGreen
-$red         = $PSStyle.Foreground.Red
-$redb        = $PSStyle.Foreground.BrightRed
-$magenta     = $PSStyle.Foreground.Magenta
-$magentab    = $PSStyle.Foreground.BrightMagenta
-$blue        = $PSStyle.Foreground.Blue
-$blueb       = $PSStyle.Foreground.BrightBlue
-$yellow      = $PSStyle.Foreground.Yellow
-$yellowb     = $PSStyle.Foreground.BrightYellow
-$black       = $PSStyle.Foreground.Black
-$blackb      = $PSStyle.Foreground.BrightBlack
-$white       = $PSStyle.Foreground.White
-$whiteb      = $PSStyle.Foreground.BrightWhite
-
-$fg_cyan     = $PSStyle.Foreground.Cyan
-$fg_cyanb    = $PSStyle.Foreground.BrightCyan
-$fg_green    = $PSStyle.Foreground.Green
-$fg_greenb   = $PSStyle.Foreground.BrightGreen
-$fg_red      = $PSStyle.Foreground.Red
-$fg_redb     = $PSStyle.Foreground.BrightRed
-$fg_magenta  = $PSStyle.Foreground.Magenta
-$fg_magentab = $PSStyle.Foreground.BrightMagenta
-$fg_blue     = $PSStyle.Foreground.Blue
-$fg_blueb    = $PSStyle.Foreground.BrightBlue
-$fg_yellow   = $PSStyle.Foreground.Yellow
-$fg_yellowb  = $PSStyle.Foreground.BrightYellow
-$fg_black    = $PSStyle.Foreground.Black
-$fg_blackb   = $PSStyle.Foreground.BrightBlack
-$fg_white    = $PSStyle.Foreground.White
-$fg_whiteb   = $PSStyle.Foreground.BrightWhite
-
-$bg_cyan     = $PSStyle.Background.Cyan
-$bg_cyanb    = $PSStyle.Background.BrightCyan
-$bg_green    = $PSStyle.Background.Green
-$bg_bgreen   = $PSStyle.Background.BrightGreen
-$bg_red      = $PSStyle.Background.Red
-$bg_redb     = $PSStyle.Background.BrightRed
-$bg_magenta  = $PSStyle.Background.Magenta
-$bg_magentab = $PSStyle.Background.BrightMagenta
-$bg_blue     = $PSStyle.Background.Blue
-$bg_blueb    = $PSStyle.Background.BrightBlue
-$bg_yellow   = $PSStyle.Background.Yellow
-$bg_yellowb  = $PSStyle.Background.BrightYellow
-$bg_black    = $PSStyle.Background.Black
-$bg_blackb   = $PSStyle.Background.BrightBlack
-$bg_white    = $PSStyle.Background.White
-$bg_whiteb   = $PSStyle.Background.BrightWhite
-
-$inv         = $PSStyle.Reverse
-$inv_off     = $PSStyle.ReverseOff
-
-$b           = $PSStyle.Bold
-$b_off       = $PSStyle.BoldOff
-$bo          = $bo
-
-$i           = $PSStyle.Italic
-$i_off       = $PSStyle.ItalicOff
-$io          = $io
-
-$u           = $PSStyle.Underline
-$u_off       = $PSStyle.UnderlineOff
-$uo          = $uo_off
-
-$s           = $PSStyle.Strikethrough
-$s_off       = $PSStyle.StrikethroughOff
-$so          = $s_off
-
-$th          = $PSStyle.Formatting.TableHeader
-$fmt_acc     = $PSStyle.Formatting.FormatAccent
-$cc          = $fmt_acc
-$err_acc     = $PSStyle.Formatting.ErrorAccent
-$err         = $err_acc
-$warn        = $PSStyle.Formatting.Warning
-
-$r           = $PSStyle.Reset
-$reset       = $r
-
-$fr          = "$inv_off$bo$io$uo$so$r"
-$reset_force = $fr

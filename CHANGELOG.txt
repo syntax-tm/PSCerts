@@ -1,12 +1,20 @@
+v0.0.16
+
+- Fixed CHANGELOG
+
+v0.0.15
+
+- Added ANSI escape support for Windows PowerShell
+- Fixed Get-CertPrivateKey
+
 v0.0.14
 
 - Improved private key file search
-- Updated `README.md`
 
 v0.0.13
 
-- Added `Set-CertFriendlyName`
-- Updated `Add-CertPermissions`
+- Added Set-CertFriendlyName
+- Updated Add-CertPermissions
 
 v0.0.12
 
@@ -14,19 +22,17 @@ v0.0.12
 
 v0.0.11
 
-- Updated `Get-CertPrivateKey`
+- Updated Get-CertPrivateKey
 
 v0.0.10
 
-- Added `Import-Certs`
-- Added `Add-SiteBinding`
-- Added XML documentation
-- Updated `Get-CertSummary`
-- Updated `README.md`
+- Added Import-Certs
+- Added Add-SiteBinding
+- Updated Get-CertSummary
 
 v0.0.9
 
-- Added `LICENSE`
-- Added `CHANGELOG.md`
+- Added LICENSE
+- Added CHANGELOG
 - Fixed ACLs on Windows PowerShell
 - Misc. cleanup

@@ -18,6 +18,7 @@ $moduleFiles = @(
     (Join-Path $slnRoot 'PSCerts\PSCerts.format.ps1xml')
     (Join-Path $slnRoot 'PSCerts\PSCerts.psd1')
     (Join-Path $slnRoot 'PSCerts\PSCerts.psm1')
+    (Join-Path $slnRoot 'PSCerts\init.ps1')
 )
 
 $projectFileName = "PSCerts.csproj"
@@ -46,7 +47,7 @@ foreach ($key in $frameworks.Keys)
         return
     }
 
-    Write-Host "`n$projectFileName build succeeded.`n" -ForegroundColor Green
+    Write-Host "`n$projectFileName $key build succeeded.`n" -ForegroundColor Green
 
     Write-Host "Publishing '$projectFileName'...`n"
 
@@ -70,7 +71,7 @@ foreach ($key in $frameworks.Keys)
         return
     }
 
-    Get-ChildItem -Path $publishBuildPath -Exclude *.dll,*.deps.json | Remove-Item
+    Get-ChildItem -Path $publishBuildPath -Exclude *.ps1,*.dll,*.deps.json | Remove-Item
 
     Write-Host "`n$key ($framework) publish was successful." -ForegroundColor Green
 }

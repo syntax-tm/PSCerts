@@ -6,10 +6,12 @@ Set-Location $PSScriptRoot
 
 $module = 'PSCerts'
 $moduleFileName = "$module.psm1"
+$manifestFileName = "$module.psd1"
 $slnRoot = Split-Path $PSScriptRoot
 $publishPath = Join-Path $slnRoot "publish"
 $testPath = Join-Path $slnRoot "test"
 $modulePath = Join-Path $testPath $moduleFileName
+$manifestPath = Join-Path $testPath $manifestFileName
 
 . .\shared\utils.ps1
 
@@ -18,6 +20,11 @@ $modulePath = Join-Path $testPath $moduleFileName
 Write-Host ""
 
 if ($global:BuildStatusCode -ne 0) { return }
+
+$manifestUpdated = Update-Manifest -Path $manifestPath -Testing
+if (!$manifestUpdated) {
+    return
+}
 
 # copy everything from the publish directory to the testing directory
 # that way we're still able to build
