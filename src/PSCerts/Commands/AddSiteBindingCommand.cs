@@ -14,6 +14,7 @@ namespace PSCerts.Commands
     public class AddSiteBindingCommand : CmdletBase
     {
         private const string CERT_PARAM_SET = nameof(CERT_PARAM_SET);
+        private const string THUMBPRINT_PARAM_SET = nameof(THUMBPRINT_PARAM_SET);
         private const string FROM_FILE_SET = nameof(FROM_FILE_SET);
         private const string FROM_FILE_SECURE_SET = nameof(FROM_FILE_SECURE_SET);
 
@@ -25,6 +26,11 @@ namespace PSCerts.Commands
 
         [Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true, ParameterSetName = CERT_PARAM_SET)]
         public X509Certificate2 Certificate { get; set; }
+
+        [Parameter(Mandatory = true, Position = 0, ParameterSetName = THUMBPRINT_PARAM_SET)]
+        [Alias("File", "Path")]
+        [ValidateNotNullOrEmpty]
+        public string Thumbprint { get; set; }
 
         [Parameter(Mandatory = true, Position = 0, ParameterSetName = FROM_FILE_SET)]
         [Parameter(Mandatory = true, Position = 0, ParameterSetName = FROM_FILE_SECURE_SET)]
@@ -43,6 +49,7 @@ namespace PSCerts.Commands
         public SecureString SecurePassword { get; set; }
 
         [Parameter(Position = 1, ParameterSetName = CERT_PARAM_SET)]
+        [Parameter(Position = 1, ParameterSetName = THUMBPRINT_PARAM_SET)]
         [Parameter(Position = 2, ParameterSetName = FROM_FILE_SET)]
         [Parameter(Position = 2, ParameterSetName = FROM_FILE_SECURE_SET)]
         [Alias("Name")]
@@ -50,6 +57,7 @@ namespace PSCerts.Commands
         public string Site { get; set; } = DEFAULT_SITE_NAME;
         
         [Parameter(Position = 2, ParameterSetName = CERT_PARAM_SET, HelpMessage = BINDING_INFO_HELP)]
+        [Parameter(Position = 2, ParameterSetName = THUMBPRINT_PARAM_SET, HelpMessage = BINDING_INFO_HELP)]
         [Parameter(Position = 3, ParameterSetName = FROM_FILE_SET, HelpMessage = BINDING_INFO_HELP)]
         [Parameter(Position = 3, ParameterSetName = FROM_FILE_SECURE_SET, HelpMessage = BINDING_INFO_HELP)]
         [Alias("Binding","Info")]
@@ -57,13 +65,9 @@ namespace PSCerts.Commands
         public string BindingInformation { get; set; } = DEFAULT_BINDING_INFO;
         
         [Parameter(Position = 3, ParameterSetName = CERT_PARAM_SET)]
+        [Parameter(Position = 3, ParameterSetName = THUMBPRINT_PARAM_SET)]
         [Parameter(Position = 4, ParameterSetName = FROM_FILE_SET)]
         [Parameter(Position = 4, ParameterSetName = FROM_FILE_SECURE_SET)]
-        public StoreName Store { get; set; } = StoreName.My;
-
-        [Parameter(Position = 4, ParameterSetName = CERT_PARAM_SET)]
-        [Parameter(Position = 5, ParameterSetName = FROM_FILE_SET)]
-        [Parameter(Position = 5, ParameterSetName = FROM_FILE_SECURE_SET)]
         public SslFlags SslFlags { get; set; } = SslFlags.None;
 
         protected override void ProcessRecord()
@@ -75,6 +79,7 @@ namespace PSCerts.Commands
                 var cert = ParameterSetName switch
                 {
                     CERT_PARAM_SET       => Certificate,
+                    THUMBPRINT_PARAM_SET => CertHelper.FindCertificate(Thumbprint),
                     FROM_FILE_SET        => new (FilePath, Password, X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable),
                     FROM_FILE_SECURE_SET => new (FilePath, SecurePassword, X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable),
                     _                    => throw new ArgumentException($"Unknown parameter set {ParameterSetName}."),
@@ -82,7 +87,7 @@ namespace PSCerts.Commands
 
                 var thumbprint = cert.Thumbprint ?? throw new InvalidOperationException($"{nameof(X509Certificate2)} {nameof(X509Certificate2.Thumbprint)} cannot be null.");
 
-                store = new (Store, StoreLocation.LocalMachine);
+                store = new (StoreName.My, StoreLocation.LocalMachine);
                 store.Open(OpenFlags.ReadWrite | OpenFlags.OpenExistingOnly);
 
                 store.Add(cert);
@@ -98,12 +103,16 @@ namespace PSCerts.Commands
 
                 if (appPool == null) throw new InvalidOperationException($"An {nameof(ApplicationPool)} with the name {appPoolName} was not found.");
 
+                WriteVerbose($"IIS applicaiton pool {appPool.Name} found.");
+
                 var appPoolIdentity = IISHelper.GetApplicationPoolIdentity(appPool);
                 var acl = FileSystemHelper.AddAccessControl(pk, appPoolIdentity);
 
                 WriteVerbose($"Added {FileSystemRights.Read} permissions for {appPoolIdentity} on {pk}.");
 
-                var binding = site.Bindings.Add(BindingInformation, HTTPS_PROTOCOL);
+                // if a binding already existts, we'll update that, otherwise create a new one
+                var existingBinding = site.Bindings.Where(b => b.BindingInformation == BindingInformation);
+                var binding = existingBinding.FirstOrDefault() ?? site.Bindings.Add(BindingInformation, HTTPS_PROTOCOL);
                 binding.CertificateHash = cert.GetCertHash();
                 binding.SslFlags = SslFlags;
                 binding.CertificateStoreName = store.Name;
@@ -117,7 +126,7 @@ namespace PSCerts.Commands
                     AppPoolIdentity = appPoolIdentity,
                     Certificate = cert,
                     Location = StoreLocation.LocalMachine,
-                    StoreName = Store,
+                    StoreName = StoreName.My,
                     PrivateKeySecurity = acl,
                     Binding = binding
                 };

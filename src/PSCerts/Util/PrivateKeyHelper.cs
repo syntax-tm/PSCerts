@@ -75,6 +75,8 @@ namespace PSCerts.Util
 
             try
             {
+                if (string.IsNullOrWhiteSpace(thumbprint)) return false;
+
                 var cert = CertHelper.FindCertificate(thumbprint);
                 return TryGetPrivateKey(cert, out filePath);
             }
@@ -90,6 +92,8 @@ namespace PSCerts.Util
 
             try
             {
+                if (!cert.HasPrivateKey) return false;
+
                 var privateKeyFile = GetPrivateKeyName(cert);
                 filePath = LocatePrivateKey(privateKeyFile);
                 return true;
@@ -132,11 +136,18 @@ namespace PSCerts.Util
 
             foreach (var location in KeyContainers)
             {
-                if (!Directory.Exists(location)) continue;
+                try
+                {
+                    if (!Directory.Exists(location)) continue;
 
-                var results = Directory.GetFiles(location, $"*{keyName}*", SearchOption.AllDirectories);
-                if (!results.Any()) continue;
-                return results.Single();
+                    var results = Directory.GetFiles(location, $"*{keyName}*", SearchOption.AllDirectories);
+                    if (!results.Any()) continue;
+                    return results.First();
+                }
+                catch (Exception e)
+                {
+                    PowerShellHelper.Debug($"{e}");
+                }
             }
 
             throw new ArgumentException($"Unable to find private key '{keyName}'.", nameof(keyName));

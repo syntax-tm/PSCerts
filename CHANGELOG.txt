@@ -1,3 +1,11 @@
+v0.0.17
+
+- Updated Add-SiteBinding
+- Updated custom formats
+- Updated Get-CertPermissions
+- Updated Get-CertPrivateKey
+- Updated Get-CertSummary
+
 v0.0.16
 
 - Fixed CHANGELOG

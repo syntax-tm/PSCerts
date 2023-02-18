@@ -11,6 +11,7 @@ namespace PSCerts.Summary
     {
         public StoreLocation Location { get; internal set; }
         public string Store { get; set; }
+        public string DisplayName { get; }
         public string FriendlyName { get; }
         public string Thumbprint { get; }
         public string Subject { get; }
@@ -25,6 +26,9 @@ namespace PSCerts.Summary
             FriendlyName = certificate.FriendlyName;
             Thumbprint = certificate.Thumbprint;
             Subject = certificate.SubjectName.Format(false);
+            DisplayName = !string.IsNullOrWhiteSpace(FriendlyName)
+                ? FriendlyName
+                : Subject;
         }
 
         public CertSummaryItem(X509Store store, X509Certificate2 certificate)

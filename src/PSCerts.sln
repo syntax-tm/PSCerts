@@ -10,7 +10,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{AE13B495-6A2B-4E13-AB14-E409D06E256B}"
 	ProjectSection(SolutionItems) = preProject
 		Scripts\build.ps1 = Scripts\build.ps1
-		scripts\publish_psgallery.ps1 = scripts\publish_psgallery.ps1
+		scripts\publish.ps1 = scripts\publish.ps1
 		Scripts\test.ps1 = Scripts\test.ps1
 	EndProjectSection
 EndProject

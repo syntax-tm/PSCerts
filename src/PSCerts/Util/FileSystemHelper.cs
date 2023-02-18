@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -10,6 +11,47 @@ namespace PSCerts.Util
 {
     public static class FileSystemHelper
     {
+        private static readonly Dictionary<string, string> _fsrMap = new ()
+        {
+            { nameof(FileSystemRights.AppendData),                   @"AD"  },
+            { nameof(FileSystemRights.ChangePermissions),            @"CP"  },
+            { nameof(FileSystemRights.CreateDirectories),            @"CD"  },
+            { nameof(FileSystemRights.CreateFiles),                  @"CF"  },
+            { nameof(FileSystemRights.Delete),                       @"D"   },
+            { nameof(FileSystemRights.DeleteSubdirectoriesAndFiles), @"DR"  },
+            { nameof(FileSystemRights.ExecuteFile),                  @"EX"  },
+            { nameof(FileSystemRights.FullControl),                  @"FC"  },
+            { nameof(FileSystemRights.ListDirectory),                @"LD"  },
+            { nameof(FileSystemRights.Modify),                       @"M"   },
+            { nameof(FileSystemRights.Read),                         @"R"   },
+            { nameof(FileSystemRights.ReadAndExecute),               @"RX"  },
+            { nameof(FileSystemRights.ReadAttributes),               @"RA"  },
+            { nameof(FileSystemRights.ReadData),                     @"RD"  },
+            { nameof(FileSystemRights.ReadExtendedAttributes),       @"REA" },
+            { nameof(FileSystemRights.ReadPermissions),              @"RP"  },
+            { nameof(FileSystemRights.Synchronize),                  @"S"   },
+            { nameof(FileSystemRights.TakeOwnership),                @"TO"  },
+            { nameof(FileSystemRights.Traverse),                     @"TR"  },
+            { nameof(FileSystemRights.Write),                        @"W"   },
+            { nameof(FileSystemRights.WriteAttributes),              @"WA"  },
+            { nameof(FileSystemRights.WriteData),                    @"WD"  },
+            { nameof(FileSystemRights.WriteExtendedAttributes),      @"WEA" },
+        };
+
+        public static string GetShortFileSystemRightsString(FileSystemRights fsr, bool removeWhitespace = true)
+        {
+            var rights = fsr.ToString("F");
+
+            foreach (var key in _fsrMap.Keys)
+            {
+                rights = rights.Replace(key, _fsrMap[key]);
+            }
+            
+            return removeWhitespace
+                ? rights.Replace(@" ", string.Empty)
+                : rights;
+        }
+
         public static FileSecurity AddAccessControl(string fileName, string identity, FileSystemRights rights = FileSystemRights.Read,
                                                     AccessControlType accessType = AccessControlType.Allow)
         {

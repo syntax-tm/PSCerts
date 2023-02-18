@@ -4,16 +4,7 @@ $ErrorActionPreference = 'Stop'
 
 Set-Location $PSScriptRoot
 
-$module = 'PSCerts'
-$moduleFileName = "$module.psm1"
-$manifestFileName = "$module.psd1"
-$slnRoot = Split-Path $PSScriptRoot
-$publishPath = Join-Path $slnRoot "publish"
-$testPath = Join-Path $slnRoot "test"
-$modulePath = Join-Path $testPath $moduleFileName
-$manifestPath = Join-Path $testPath $manifestFileName
-
-. .\shared\utils.ps1
+. .\shared\all.ps1
 
 .\build.ps1
 
@@ -21,39 +12,97 @@ Write-Host ""
 
 if ($global:BuildStatusCode -ne 0) { return }
 
-$manifestUpdated = Update-Manifest -Path $manifestPath -Testing
+$manifestUpdated = Update-Manifest -Path $global:MANIFEST_PATH -Testing
 if (!$manifestUpdated) {
     return
 }
 
 # copy everything from the publish directory to the testing directory
 # that way we're still able to build
-Remove-Item $testPath -Recurse -Force -ErrorAction Ignore
-Copy-Item $publishPath -Destination $testPath -Force -Recurse -Container:$false
+Remove-Item $global:TEST_PATH -Recurse -Force -ErrorAction Ignore
+Copy-Item $global:PUBLISH_PATH -Destination $global:TEST_PATH -Force -Recurse -Container:$false
+
+# uninstall current module (if exists)
+Uninstall-Module $global:MODULE_NAME -AllVersions -Force -ErrorAction SilentlyContinue | Out-Null
+
+# remove current module (if exists)
+Remove-Module $global:MODULE_NAME -Force -ErrorAction SilentlyContinue | Out-Null
 
 # import the module from the testing directory
-Import-Module $modulePath -Verbose
+Import-Module $global:MODULE_PATH -Verbose
 
-# this will import the PFX certificates configured in utils.ps1
+# this will import the PFX certificates configured in data.ps1
 Import-TestCerts
 
-Write-Host "`n$b$black[$whiteb`TEST$black]$r $fmt_acc$b`Get-CertSummary$r"
+$testCertThumbprint = '10DF834FC47DDFC4D069D2E4FE79E4BF1D6D4DAE'
+$testCert = Get-Item "Cert:\LocalMachine\My\$testCertThumbprint"
 
-# test summary cmdlet + format
-$summary = Get-CertSummary
-$summary #| Out-Host
+function Write-TestHeader
+{
+    param(
+        [Parameter(Mandatory = $true, Position = 0)]
+        [string]$ID,
+        [Parameter(Mandatory = $true, Position = 1)]
+        [string]$CommandName,
+        [Parameter(Position = 2)]
+        [string]$Type = 'TEST',
+        [Parameter(Position = 3)]
+        [string]$Description
+    )
 
-Write-Host "`n$b$black[$whiteb`TEST$black]$r $fmt_acc$b`Get-CertPrivateKey$r"
+    $header = "$b$black[$cyanb$Type$black | $cyanb$ID$black]$r $fmt_acc$b$CommandName$r"
+    $len = $Type.Length + $CommandName.Length + $ID.Length + 6
 
-# test get-privatekey  cmdlet
-$cert = Get-Item Cert:\LocalMachine\My\10DF834FC47DDFC4D069D2E4FE79E4BF1D6D4DAE # PSCerts_01.pfx
-$certPk = Get-CertPrivateKey $cert
-$certPk | Select-Object -Property Directory, Name #| Out-Host
+    Write-Host ""
+    Write-Host $header
+    Write-Host ([string]::Empty.PadRight($len, '-'))
+    Write-Host ""
+}
 
-Write-Host "`n$b$black[$whiteb`TEST$black]$r $fmt_acc$b`CertAccessRule Format$r"
+# | TEST | 0.0.1 | Get-CertPermissions
+# ------------------------------------
 
-# test permission format
-$perms = $summary | Where-Object { $_.Permissions.Count -gt 0  } | Select-Object -ExpandProperty Permissions -First 1
-$perms #| Out-Host
+Write-TestHeader '0.0.1' 'Get-CertPermissions'
 
-#Remove-TestCerts
+Get-CertPermissions -Thumbprint $testCertThumbprint | Out-Host
+
+# | TEST | 0.0.2 | Add-CertPermissions
+# ------------------------------------
+
+Write-TestHeader '0.0.2' 'Add-CertPermissions'
+
+Add-CertPermissions -Thumbprint $testCertThumbprint -Identity 'Guest' -FileSystemRights Read -AccessType Deny
+Add-CertPermissions -Thumbprint $testCertThumbprint -Identity 'DefaultAccount' -FileSystemRights Write -AccessType Deny
+Add-CertPermissions -Thumbprint $testCertThumbprint -Identity 'DefaultAccount' -FileSystemRights Read -AccessType Allow
+Add-CertPermissions -Thumbprint $testCertThumbprint -Identity 'LOCAL SERVICE' -FileSystemRights Read -AccessType Allow
+Add-CertPermissions -Thumbprint $testCertThumbprint -Identity 'NETWORK SERVICE' -FileSystemRights FullControl -AccessType Allow
+
+Write-Host "OK" -ForegroundColor Green
+
+# | TEST | 0.0.3 | Get-CertPermissions
+# ------------------------------------
+
+Write-TestHeader '0.0.3' 'Get-CertPermissions'
+
+Get-CertPermissions -Thumbprint $testCertThumbprint | Out-Host
+
+# | TEST | 0.1.1 | Get-CertPrivateKey
+# -----------------------------------
+
+Write-TestHeader '0.1.1' 'Get-CertPrivateKey'
+
+Get-CertPrivateKey -Thumbprint $testCertThumbprint | Format-List -Property Directory, Name | Out-Host
+
+# | TEST | 0.2.1 | Get-CertSummary
+# -----------------------------------
+
+Write-TestHeader '0.2.1' 'Get-CertSummary'
+
+Get-CertSummary | Where-Object HasPrivateKey -eq $true | Out-Host
+
+# | TEST | 1.0.1 | Get-CertSummary
+# -----------------------------------
+
+Write-TestHeader '1.0.1' '[CertAccessRule]'
+
+Get-CertSummary | Where-Object Thumbprint -eq $testCertThumbprint | Select-Object -ExpandProperty Permissions -Unique | Format-Table | Out-Host

@@ -2,24 +2,35 @@
 using System.Collections.Generic;
 using System.Management.Automation;
 using System.Security.Cryptography.X509Certificates;
-using System.Security.Principal;
 using PSCerts.Util;
 
 namespace PSCerts.Commands
 {
-    [Cmdlet(VerbsCommon.Get, "CertPermissions")]
+    [Cmdlet(VerbsCommon.Get, "CertPermissions", DefaultParameterSetName = CERT_PARAM_SET)]
     [OutputType(typeof(List<CertAccessRule>))]
     public class GetCertPermissionsCommand : CmdletBase
     {
-        [Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true, ValueFromPipelineByPropertyName = true)]
+        private const string CERT_PARAM_SET = nameof(CERT_PARAM_SET);
+        private const string FIND_PARAM_SET = nameof(FIND_PARAM_SET);
+
+        [Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true,
+                   ValueFromPipelineByPropertyName = true, ParameterSetName = CERT_PARAM_SET)]
         [Alias("Cert", "InputObject")]
+        [ValidateNotNull]
         public X509Certificate2 Certificate { get; set; }
+        
+        [Parameter(Mandatory = true,  Position = 0, ValueFromPipeline = true,
+                   ValueFromPipelineByPropertyName = true, ParameterSetName = FIND_PARAM_SET)]
+        [Alias("CertHash", "Hash")]
+        [ValidateNotNullOrEmpty]
+        public string Thumbprint { get; set; }
         
         protected override void ProcessRecord()
         {
             try
             {
-                var privateKeyFile = PrivateKeyHelper.GetPrivateKey(Certificate);
+                var cert = Certificate ?? CertHelper.FindCertificate(Thumbprint);
+                var privateKeyFile = PrivateKeyHelper.GetPrivateKey(cert);
                 var rules = FileSystemHelper.GetAccessRules(privateKeyFile);
                 var perms = CertAccessRule.Create(rules);
             

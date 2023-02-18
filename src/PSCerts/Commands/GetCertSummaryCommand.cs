@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Linq;
+using System.Collections.Generic;
 using System.Management.Automation;
 using System.Security.Cryptography.X509Certificates;
 using PSCerts.Summary;
@@ -14,8 +14,7 @@ namespace PSCerts.Commands
     /// <seealso cref="CertSummaryItem" />
     /// <seealso cref="X509Certificate2" />
     [Cmdlet(VerbsCommon.Get, "CertSummary")]
-    [OutputType(typeof(CertSummary))]
-    //[OutputType(typeof(List<CertSummary>))]
+    [OutputType(typeof(List<CertSummaryItem>))]
     public class GetCertSummaryCommand : CmdletBase
     {
         protected override void ProcessRecord()
@@ -24,7 +23,7 @@ namespace PSCerts.Commands
             {
                 var summary = CertHelper.GetCertSummary();
 
-                WriteObject(summary.Items, true);
+                WriteObject(summary, true);
             }
             catch (Exception e)
             {

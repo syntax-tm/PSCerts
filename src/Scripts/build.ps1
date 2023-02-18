@@ -1,39 +1,12 @@
-﻿param(
-    [Parameter(Position = 0)]
-    [ValidateSet("Release", "Debug")]
-    [Alias("c")]
-    [string]$Configuration = "Release"
-)
+﻿$ErrorActionPreference = 'Stop'
 
-$ErrorActionPreference = 'Stop'
+. "$PSScriptRoot\shared\all.ps1"
 
-$frameworks = [hashtable]@{
-    coreclr = "netstandard2.0"
-    clr     = "net462" # "net472"
-}
-
-$slnRoot = Split-Path $PSScriptRoot
-
-$moduleFiles = @(
-    (Join-Path $slnRoot 'PSCerts\PSCerts.format.ps1xml')
-    (Join-Path $slnRoot 'PSCerts\PSCerts.psd1')
-    (Join-Path $slnRoot 'PSCerts\PSCerts.psm1')
-    (Join-Path $slnRoot 'PSCerts\init.ps1')
-)
-
-$projectFileName = "PSCerts.csproj"
-$projectFile = Join-Path $slnRoot "PSCerts\$projectFileName"
-$publishPath = Join-Path $slnRoot "publish"
-
-$global:BuildStatusCode = 0
-
-$ErrorActionPreference = 'Stop'
-
-foreach ($key in $frameworks.Keys)
+foreach ($key in $global:FRAMEWORKS.Keys)
 {
-    $framework = $frameworks[$key]
+    $framework = $global:FRAMEWORKS[$key]
 
-    dotnet build "$projectFile" -f $framework -c $configuration --sc true
+    dotnet build "$global:PROJECT_FILE_PATH" -f $framework -c $global:CONFIGURATION --sc true
 
     if ($LASTEXITCODE -ne 0)
     {
@@ -47,17 +20,17 @@ foreach ($key in $frameworks.Keys)
         return
     }
 
-    Write-Host "`n$projectFileName $key build succeeded.`n" -ForegroundColor Green
+    Write-Host "`n$global:PROJECT_FILE_NAME $key build succeeded.`n" -ForegroundColor Green
 
-    Write-Host "Publishing '$projectFileName'...`n"
+    Write-Host "Publishing '$global:PROJECT_FILE_NAME'...`n"
 
-    $publishBuildPath = Join-Path $publishPath $key
+    $publishBuildPath = Join-Path $global:PUBLISH_PATH $key
 
     if (Test-Path $publishBuildPath) {
         Remove-Item -Path $publishBuildPath -Recurse -Force
     }
 
-    dotnet publish "$projectFile" -c $Configuration -f $framework --sc -o "$publishBuildPath"
+    dotnet publish "$global:PROJECT_FILE_PATH" -c $global:CONFIGURATION -f $framework --sc -o "$publishBuildPath"
 
     if ($LASTEXITCODE -ne 0)
     {
@@ -76,9 +49,9 @@ foreach ($key in $frameworks.Keys)
     Write-Host "`n$key ($framework) publish was successful." -ForegroundColor Green
 }
 
-foreach ($moduleFile in $moduleFiles)
+foreach ($moduleFile in $global:MODULE_FILES)
 {
-    Copy-Item -Path $moduleFile -Destination $publishPath -Force
+    Copy-Item -Path $moduleFile -Destination $global:PUBLISH_PATH -Force
 }
 
-Write-Host "`nPublish completed successfully." -ForegroundColor Green
+Write-Host "`nAll $global:PROJECT_FILE_NAME target frameworks successfully built and published." -ForegroundColor Green

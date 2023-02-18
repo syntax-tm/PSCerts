@@ -13,11 +13,14 @@ namespace PSCerts.Commands
         private const string CERT_PARAM_SET = nameof(CERT_PARAM_SET);
         private const string FIND_PARAM_SET = nameof(FIND_PARAM_SET);
 
-        [Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true, ParameterSetName = CERT_PARAM_SET)]
+        [Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true, 
+                   ValueFromPipelineByPropertyName = true, ParameterSetName = CERT_PARAM_SET)]
+        [Alias("Cert", "InputObject")]
         [ValidateNotNull]
         public X509Certificate2 Certificate { get; set; }
         
-        [Parameter(Mandatory = true,  Position = 0, ValueFromPipeline = true, ParameterSetName = FIND_PARAM_SET)]
+        [Parameter(Mandatory = true,  Position = 0, ValueFromPipeline = true,
+                   ValueFromPipelineByPropertyName = true, ParameterSetName = FIND_PARAM_SET)]
         [Alias("CertHash", "Hash")]
         [ValidateNotNullOrEmpty]
         public string Thumbprint { get; set; }

@@ -7,11 +7,17 @@
                 <CustomEntries>
                     <CustomEntry>
                         <CustomItem>
-                            <ExpressionBinding>
-                                <ScriptBlock>
-                                    "$($PSStyle.Formatting.TableHeader)$($PSStyle.Reverse)$($PSStyle.Bold)  $($_.Location.ToString())  $($PSStyle.Reset)"
-                                </ScriptBlock>
-                            </ExpressionBinding>
+                            <Frame>
+                                <LeftIndent>0</LeftIndent>
+                                <CustomItem>
+                                    <ExpressionBinding>
+                                        <ScriptBlock>
+                                            "$($PSStyle.Formatting.TableHeader)$($PSStyle.Reverse)$($PSStyle.Bold)Store Location:  $($_.Location)  $($PSStyle.ReverseOff)$($PSStyle.Reset)"
+                                        </ScriptBlock>
+                                    </ExpressionBinding>
+                                    <NewLine/>
+                                </CustomItem>
+                            </Frame>
                         </CustomItem>
                     </CustomEntry>
                 </CustomEntries>
@@ -27,12 +33,12 @@
             <TableControl>
                 <TableHeaders>
                     <TableColumnHeader>
-                        <Label>Access</Label>
+                        <Label>AccessType</Label>
                         <Alignment>Center</Alignment>
                     </TableColumnHeader>
                     <TableColumnHeader>
-                        <Label>FileSystemRights</Label>
-                        <Alignment>Center</Alignment>
+                        <Label>Rights</Label>
+                        <Alignment>Left</Alignment>
                     </TableColumnHeader>
                     <TableColumnHeader>
                         <Label>Identity</Label>
@@ -44,14 +50,17 @@
                         <TableColumnItems>
                             <TableColumnItem>
                                 <ScriptBlock>
-                                    if ($_.AccessType -eq "Allow") { $color = $PSStyle.Foreground.Green }
-                                    else { $color = $PSStyle.Foreground.Red }
-
-                                    "$color$($_.AccessType)$($PSStyle.Reset)"
+                                    if ($_.IsAllow) { "$($PSStyle.Foreground.Green)$($_.AccessType)" }
+                                    else { "$($PSStyle.Foreground.Red)$($_.AccessType)" }
                                 </ScriptBlock>
                             </TableColumnItem>
                             <TableColumnItem>
-                                <ScriptBlock>"$($PSStyle.Foreground.BrightCyan)$($_.FileSystemRights)$($PSStyle.Reset)"</ScriptBlock>
+                                <ScriptBlock>
+                                    if ($_.IsAllow) { $color = $PSStyle.Foreground.Green }
+                                    else { $color = $PSStyle.Foreground.Red }
+
+                                    "$color$($_.FileSystemRights.ToString("F").Replace(", ", "`n"))$($PSStyle.Reset)"
+                                </ScriptBlock>
                             </TableColumnItem>
                             <TableColumnItem>
                                 <PropertyName>Identity</PropertyName>
@@ -80,12 +89,11 @@
                         <Width>41</Width>
                     </TableColumnHeader>
                     <TableColumnHeader>
-                        <Label>Key</Label>
-                        <Alignment>Center</Alignment>
+                        <Label>Name</Label>
                     </TableColumnHeader>
                     <TableColumnHeader>
-                        <Label>Subject</Label>
-                        <Width>30</Width>
+                        <Label>Key</Label>
+                        <Alignment>Center</Alignment>
                     </TableColumnHeader>
                     <TableColumnHeader>
                         <Label>Permissions</Label>
@@ -96,10 +104,13 @@
                         <Wrap/>
                         <TableColumnItems>
                             <TableColumnItem>
-                                <ScriptBlock>[string]::Format("{0}\{1}", $_.Location, $_.Store)</ScriptBlock>
+                                <ScriptBlock>"$($PSStyle.Foreground.BrightCyan)$($_.Location)$($PSStyle.Reset)\$($PSStyle.Foreground.BrightBlue)$($_.Store)$($PSStyle.Reset)"</ScriptBlock>
                             </TableColumnItem>
                             <TableColumnItem>
                                 <PropertyName>Thumbprint</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>DisplayName</PropertyName>
                             </TableColumnItem>
                             <TableColumnItem>
                                 <ScriptBlock>
@@ -109,20 +120,21 @@
                             </TableColumnItem>
                             <TableColumnItem>
                                 <ScriptBlock>
-                                    if ($_.Subject.Length -ge 30) { "$($_.Subject.Substring(0, 27))..." }
-                                    else { "$($_.Subject)" }
-                                </ScriptBlock>
-                            </TableColumnItem>
-                            <TableColumnItem>
-                                <ScriptBlock>
                                     $output = @()
+                                    $maxLength = $_.Permissions `
+                                        | select @{N='Length';E={$_.FileSystemRightsString.Length}} `
+                                        | sort -Property Length -Descending `
+                                        | select -First 1 -ExpandProperty Length
+
                                     foreach ($perm in $_.Permissions)
                                     {
-                                        $access = "[$($perm.AccessType.ToString())]"
-                                        if ($perm.AccessType -eq "Allow") { $color = $PSStyle.Foreground.Green }
-                                        else { $color = $PSStyle.Foreground.Red; $access += " " }
-
-                                        $output += "$color$access$($PSStyle.Reset) $($PSStyle.Foreground.BrightCyan){$($perm.FileSystemRights)}$($PSStyle.Reset) $($perm.Identity)"
+                                        if ($perm.IsAllow) {
+                                            $access = "$($PSStyle.Bold)$($PSStyle.Foreground.BrightGreen)+$($PSStyle.BoldOff) "
+                                        }
+                                        else {
+                                            $access = "$($PSStyle.Bold)$($PSStyle.Foreground.BrightRed)-$($PSStyle.BoldOff) "
+                                        }
+                                        $output += "$access$($perm.FileSystemRightsString.PadRight($maxLength)) $($PSStyle.Reset) $($perm.IdentityDisplayString)"
                                     }
                                     [string]::Join("`n", $output)
                                 </ScriptBlock>

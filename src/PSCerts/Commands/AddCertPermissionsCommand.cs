@@ -16,14 +16,14 @@ namespace PSCerts.Commands
     /// <para>Then calls <c>Add-CertPermissions</c> to grant <c>"NETWORK SERVICE"</c> account <c>FullControl</c> to the <c>$cert</c>'s private key.</para>
     /// <code>
     /// $cert = Get-Item Cert:\LocalMachine\My\10df834fc47ddfc4d069d2e4fe79e4bf1d6d4dae
-    /// Add-CertPermissions -Certificate $cert -Identity "Network Service" -FileSystemRights FullControl -AccessType Allow
+    /// Add-CertPermissions -Certificate $cert -Identity "NETWORK SERVICE" -FileSystemRights FullControl -AccessType Allow
     /// </code>
     /// </example>
     /// <seealso cref="X509Certificate2" />
     /// <seealso cref="FileSystemAccessRule" />
     /// <seealso cref="RSA" />
     [Cmdlet(VerbsCommon.Add, "CertPermissions", DefaultParameterSetName = PROPS_PARAM_SET)]
-    [OutputType(typeof(FileSecurity))]
+    [OutputType(typeof(void))]
     public class AddCertPermissionsCommand : CmdletBase
     {
         private const string PROPS_PARAM_SET = nameof(PROPS_PARAM_SET);
@@ -48,7 +48,7 @@ namespace PSCerts.Commands
         /// <summary>
         /// The <see cref="FileSystemAccessRule"/> to be added.
         /// </summary>
-        /// <seealso cref="System.Security.AccessControl.FileSystemAccessRule" />
+        /// <seealso cref="FileSystemAccessRule" />
         [Parameter(Mandatory = true, Position = 1, ParameterSetName = ACCESS_RULE_PARAM_SET)]
         [Parameter(Mandatory = true, Position = 1, ParameterSetName = HASH_ACCESS_RULE_PARAM_SET)]
         [Alias("FileSystemAccessRule", "AccessRule")]
@@ -100,9 +100,7 @@ namespace PSCerts.Commands
                     _                          => throw new ArgumentException($"Unknown {nameof(ParameterSetName)} {ParameterSetName}.")
                 };
                 
-                var acl = FileSystemHelper.AddAccessControl(privateKeyFile, rule);
-
-                WriteObject(acl);
+                FileSystemHelper.AddAccessControl(privateKeyFile, rule);
             }
             catch (Exception e)
             {

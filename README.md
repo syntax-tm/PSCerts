@@ -65,11 +65,34 @@ Add-CertPermissions [-Thumbprint] <string> [-Rule] <FileSystemAccessRule>
 $cert = Get-Item Cert:\LocalMachine\My\10df834fc47ddfc4d069d2e4fe79e4bf1d6d4dae
 Add-CertPermissions -Certificate $cert -Identity "Network Service" -FileSystemRights FullControl -AccessType Allow
 
-
 Add-CertPermissions -Thumbprint "10df834fc47ddfc4d069d2e4fe79e4bf1d6d4dae" -Identity "Network Service" -FileSystemRights FullControl -AccessType Allow
 ```
 
-**Returns:** [FileSecurity](https://learn.microsoft.com/en-us/dotnet/api/system.security.accesscontrol.filesecurity?view=net-7.0)
+**Returns:** `None`
+
+---
+
+### Add-SiteBinding
+
+Adds or updates the SSL [Binding](https://learn.microsoft.com/en-us/dotnet/api/microsoft.web.administration.binding) of an IIS site.
+
+**Usage:**
+
+```powershell
+Add-SiteBinding [-Certificate] <X509Certificate2> [-Site] <string> [-BindingInformation] <string> [-SslFlags] <SslFlags>
+Add-SiteBinding [-Thumbprint] <string> [-Site] <string> [-BindingInformation] <string> [-SslFlags] <SslFlags>
+Add-SiteBinding [-FilePath] <string> [-Password] <string> [-Site] <string> [-BindingInformation] <string> [-SslFlags] <SslFlags>
+Add-SiteBinding [-FilePath] <string> [-SecurePassword] <SecureString> [-Site] <string> [-BindingInformation] <string> [-SslFlags] <SslFlags>
+```
+
+**Examples:**
+
+```powershell
+# adds a new SSL binding for the default site
+Add-SiteBinding -Thumbprint '10df834fc47ddfc4d069d2e4fe79e4bf1d6d4dae' -Site 'Default Web Site'
+```
+
+**Returns:** [CertBinding](./src/PSCerts/Models/CertBinding.cs)
 
 ---
 
@@ -79,6 +102,7 @@ Returns the access control and audit security for a certificate's private key.
 
 ```powershell
 Get-CertPermissions [-Certificate] <X509Certificate2>
+Get-CertPermissions [-Thumbprint] <string>
 ```
 
 **Examples:**
@@ -86,6 +110,8 @@ Get-CertPermissions [-Certificate] <X509Certificate2>
 ```powershell
 $cert = Get-Item Cert:\LocalMachine\My\10df834fc47ddfc4d069d2e4fe79e4bf1d6d4dae
 Get-CertPermissions -Certificate $cert
+
+Get-CertPermissions -Thumbprint '10df834fc47ddfc4d069d2e4fe79e4bf1d6d4dae'
 ```
 
 **Returns:** [List\<CertAccessRule>](./src/PSCerts/Models/CertAccessRule.cs)
@@ -108,9 +134,11 @@ Get-CertPrivateKey [-Thumbprint] <string>
 ```powershell
 $cert = Get-Item Cert:\LocalMachine\My\10df834fc47ddfc4d069d2e4fe79e4bf1d6d4dae
 Get-CertPrivateKey -Certificate $cert
+
+Get-CertPrivateKey -Thumbprint '10df834fc47ddfc4d069d2e4fe79e4bf1d6d4dae'
 ```
 
-**Returns:** [FileInfo](https://learn.microsoft.com/en-us/dotnet/api/system.io.fileinfo?view=net-7.0)
+**Returns:** [FileInfo](https://learn.microsoft.com/en-us/dotnet/api/system.io.fileinfo)
 
 ---
 
@@ -136,7 +164,7 @@ Get-CertSummary
 
 ### Set-CertFriendlyName
 
-Updates the `FriendlyName` of an `X509Certificate2`.
+Updates the [FriendlyName](https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.x509certificates.x509certificate2.friendlyname) of an [X509Certificate2](https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.x509certificates.x509certificate2).
 
 **Usage:**
 
@@ -148,23 +176,14 @@ Set-CertFriendlyName [-Thumbprint] <string> [-FriendlyName] <string>
 **Examples:**
 
 ```powershell
-Set-CertFriendlyName -Thumbprint "10df834fc47ddfc4d069d2e4fe79e4bf1d6d4dae" -FriendlyName "My Test Cert"
+Set-CertFriendlyName -Thumbprint '10df834fc47ddfc4d069d2e4fe79e4bf1d6d4dae' -FriendlyName "My Test Cert"
 ```
 
-**Returns:** [X509Certificate2](https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.x509certificates.x509certificate2?view=net-7.0)
+**Returns:** [X509Certificate2](https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.x509certificates.x509certificate2)
 
 ---
 
 ## In-Progress
-
-<details>
-  <summary><b>Add-SiteBinding</b></summary>
-
-Adds a new or updates an existing IIS site's binding.
-
-TODO: Consider renaming the noun and using the `Set` verb instead of `Add`.
-
-</details>
 
 <details>
   <summary><b>Import-Certs</b></summary>
@@ -190,18 +209,13 @@ The `type` indicates how to handle the `value` property (see below).
 
 ## Backlog
 
-- [x] Finish `Add-SiteBinding`
-- [x] Finish `Import-Certs`
-- [ ] Add documentation for `Add-SiteBinding`
 - [ ] Finish documentation for `Import-Certs`
 - [-] Add Cmdlet help information
 - [ ] Add unit tests
-- [x] Add support for .NET 4.6.2(or older)
 - [ ] Add version history, release notes, etc. to the module manifest
 - [ ] Move non-Cmdlet code to a separate project
 - [ ] Create NuGet package for the core functionality
 - [ ] Come up with better names for the model classes (and others)
-- [x] Move [Version History](/CHANGELOG.txt) to its own file
 - [ ] Create documentation (wiki)
 
 ## Reference
