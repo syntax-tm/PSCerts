@@ -210,7 +210,7 @@ The `type` indicates how to handle the `value` property (see below).
 ## Backlog
 
 - [ ] Finish documentation for `Import-Certs`
-- [-] Add Cmdlet help information
+- [ ] Add Cmdlet help information
 - [ ] Add unit tests
 - [ ] Add version history, release notes, etc. to the module manifest
 - [ ] Move non-Cmdlet code to a separate project
