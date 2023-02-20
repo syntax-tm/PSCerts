@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Management.Automation;
 using System.Security;
@@ -76,14 +77,33 @@ namespace PSCerts.Commands
 
             try
             {
-                var cert = ParameterSetName switch
+                X509Certificate2 cert = null;
+
+                if (Certificate is not null)
                 {
-                    CERT_PARAM_SET       => Certificate,
-                    THUMBPRINT_PARAM_SET => CertHelper.FindCertificate(Thumbprint),
-                    FROM_FILE_SET        => new (FilePath, Password, X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable),
-                    FROM_FILE_SECURE_SET => new (FilePath, SecurePassword, X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable),
-                    _                    => throw new ArgumentException($"Unknown parameter set {ParameterSetName}."),
-                };
+                    cert = Certificate;
+                }
+                else if (!string.IsNullOrWhiteSpace(Thumbprint))
+                {
+                    cert = CertHelper.FindCertificate(Thumbprint);
+                }
+                else if (!string.IsNullOrWhiteSpace(FilePath))
+                {
+                    if (!File.Exists(FilePath)) throw new FileNotFoundException($"File '{FilePath}' does not exist.", FilePath);
+                    if (!string.IsNullOrWhiteSpace(Password))
+                    {
+                        cert = new (FilePath, Password, X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
+                    }
+                    else if (SecurePassword is not null)
+                    {
+                        cert = new (FilePath, SecurePassword, X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
+                    }
+                }
+
+                if (cert == null)
+                {
+                    throw new ArgumentException("Unknown parameter set.");
+                }
 
                 var thumbprint = cert.Thumbprint ?? throw new InvalidOperationException($"{nameof(X509Certificate2)} {nameof(X509Certificate2.Thumbprint)} cannot be null.");
 
@@ -103,14 +123,14 @@ namespace PSCerts.Commands
 
                 if (appPool == null) throw new InvalidOperationException($"An {nameof(ApplicationPool)} with the name {appPoolName} was not found.");
 
-                WriteVerbose($"IIS applicaiton pool {appPool.Name} found.");
+                WriteVerbose($"IIS application pool {appPool.Name} found.");
 
                 var appPoolIdentity = IISHelper.GetApplicationPoolIdentity(appPool);
                 var acl = FileSystemHelper.AddAccessControl(pk, appPoolIdentity);
 
                 WriteVerbose($"Added {FileSystemRights.Read} permissions for {appPoolIdentity} on {pk}.");
 
-                // if a binding already existts, we'll update that, otherwise create a new one
+                // if a binding already exists, we'll update that, otherwise create a new one
                 var existingBinding = site.Bindings.Where(b => b.BindingInformation == BindingInformation);
                 var binding = existingBinding.FirstOrDefault() ?? site.Bindings.Add(BindingInformation, HTTPS_PROTOCOL);
                 binding.CertificateHash = cert.GetCertHash();

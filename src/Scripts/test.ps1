@@ -12,11 +12,6 @@ Write-Host ""
 
 if ($global:BuildStatusCode -ne 0) { return }
 
-$manifestUpdated = Update-Manifest -Path $global:MANIFEST_PATH -Testing
-if (!$manifestUpdated) {
-    return
-}
-
 # copy everything from the publish directory to the testing directory
 # that way we're still able to build
 Remove-Item $global:TEST_PATH -Recurse -Force -ErrorAction Ignore
@@ -26,10 +21,16 @@ Copy-Item $global:PUBLISH_PATH -Destination $global:TEST_PATH -Force -Recurse -C
 Uninstall-Module $global:MODULE_NAME -AllVersions -Force -ErrorAction SilentlyContinue | Out-Null
 
 # remove current module (if exists)
-Remove-Module $global:MODULE_NAME -Force -ErrorAction SilentlyContinue | Out-Null
+Get-Module $global:MODULE_NAME -ListAvailable | Remove-Item -Force | Out-Null
+
+$manifestUpdated = Update-Manifest -Path $global:TEST_MANIFEST_PATH -Testing
+if (!$manifestUpdated)
+{
+    return
+}
 
 # import the module from the testing directory
-Import-Module $global:MODULE_PATH -Verbose
+Import-Module $global:TEST_MANIFEST_PATH -Verbose
 
 # this will import the PFX certificates configured in data.ps1
 Import-TestCerts

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Management.Automation;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
 using PSCerts.Summary;
@@ -48,39 +49,58 @@ namespace PSCerts.Util
         {
             if (string.IsNullOrWhiteSpace(thumbprint)) throw new ArgumentNullException(nameof(thumbprint));
 
-            var certs = new List<X509Certificate2>();
-            var locations = new [] { StoreLocation.LocalMachine, StoreLocation.CurrentUser };
-            var stores = Enum.GetValues(typeof(StoreName)).Cast<StoreName>();
-            var certStores = from l in locations
-                             from s in stores
-                             select new { Location = l, Store = s };
+            using var ps = PowerShell.Create();
 
-            foreach (var certStore in certStores)
-            {
-                try
-                {
-                    using var store = new X509Store(certStore.Store, certStore.Location);
-                    store.Open(OpenFlags.ReadOnly);
+            ps.AddCommand("Get-ChildItem");
+            ps.AddParameter("Path", "Cert:\\*");
+            ps.AddParameter("Recurse");
+            ps.AddCommand("Where-Object");
+            ps.AddParameter("Property", nameof(X509Certificate2.Thumbprint));
+            ps.AddParameter("Like");
+            ps.AddParameter("Value", $"*{thumbprint}*");
+            ps.AddCommand("Sort-Object");
+            ps.AddParameter("Property", nameof(X509Certificate2.HasPrivateKey));
+            ps.AddParameter("Descending");
+            ps.AddCommand("Select-Object");
+            ps.AddParameter("First", 1);
 
-                    var results = store.Certificates.Find(X509FindType.FindByThumbprint, thumbprint, false);
+            var result = ps.Invoke<X509Certificate2>()?.FirstOrDefault();
 
-                    if (results.Count == 0) continue;
+            return result;
 
-                    var certResult = results[0];
-                    if (certResult.HasPrivateKey)
-                    {
-                        return certResult;
-                    }
-
-                    certs.Add(certResult);
-                }
-                catch (Exception e)
-                {
-                    PowerShellHelper.Error(e);
-                }
-            }
-
-            return certs.FirstOrDefault() ?? throw new KeyNotFoundException($"Unable to find a certificate with thumbprint '{thumbprint}'.");
+            //var certs = new List<X509Certificate2>();
+            //var locations = new [] { StoreLocation.LocalMachine, StoreLocation.CurrentUser };
+            //var stores = Enum.GetValues(typeof(StoreName)).Cast<StoreName>();
+            //var certStores = from l in locations
+            //                 from s in stores
+            //                 select new { Location = l, Store = s };
+            //
+            //foreach (var certStore in certStores)
+            //{
+            //    try
+            //    {
+            //        using var store = new X509Store(certStore.Store, certStore.Location);
+            //        store.Open(OpenFlags.ReadOnly);
+            //
+            //        var results = store.Certificates.Find(X509FindType.FindByThumbprint, thumbprint, false);
+            //
+            //        if (results.Count == 0) continue;
+            //
+            //        var certResult = results[0];
+            //        if (certResult.HasPrivateKey)
+            //        {
+            //            return certResult;
+            //        }
+            //
+            //        certs.Add(certResult);
+            //    }
+            //    catch (Exception e)
+            //    {
+            //        PowerShellHelper.Error(e);
+            //    }
+            //}
+            //
+            //return certs.FirstOrDefault() ?? throw new KeyNotFoundException($"Unable to find a certificate with thumbprint '{thumbprint}'.");
         }
 
         public static List<CertSummaryItem> GetCertSummary()

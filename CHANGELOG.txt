@@ -1,3 +1,14 @@
+v0.0.18
+
+- Updated Add-SiteBinding
+- Updated Add-CertPermissions
+- Updated CmdletBase to inherit from Cmdlet instead of PSCmdlet
+- Updated FindCertificate in CertHelper
+- Updated Get-CertPermissions
+- Updated Get-CertPrivateKey
+- Updated Get-CertSummary
+- Updated Set-CertFriendlyName
+
 v0.0.17
 
 - Updated Add-SiteBinding

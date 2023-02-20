@@ -5,36 +5,58 @@ namespace PSCerts.Util
 {
     public static class PowerShellHelper
     {
-        public static PSCmdlet CurrentCmdlet { get; set; }
-        
-        public static void WriteVerbose(string message)
+        private static PowerShell _default;
+        public static PowerShell Default
         {
-            CurrentCmdlet?.WriteVerbose(message);
-        }
+            get
+            {
+                if (_default != null) return _default;
 
+                _default = PowerShell.Create();
+
+                return _default;
+            }
+        }
+        
         public static void Debug(string message)
         {
-            CurrentCmdlet?.WriteDebug(message);
+            using var ps = PowerShell.Create();
+            ps.AddCommand("Write-Debug");
+            ps.AddParameter("Message", message);
+            ps.Invoke();
+        }
+
+        public static void Verbose(string message)
+        {
+            using var ps = PowerShell.Create();
+            ps.AddCommand("Write-Verbose");
+            ps.AddParameter("Message", message);
+            ps.Invoke();
         }
 
         public static void Info(string message)
         {
-            CurrentCmdlet?.WriteInformation(new (message, null));
+            using var ps = PowerShell.Create();
+            ps.AddCommand("Write-Information");
+            ps.AddParameter("MessageData", message);
+            ps.Invoke();
         }
 
         public static void Warn(string message)
         {
-            CurrentCmdlet?.WriteWarning(message);
+            using var ps = PowerShell.Create();
+            ps.AddCommand("Write-Warning");
+            ps.AddParameter("Message", message);
+            ps.Invoke();
         }
 
-        public static void Error(Exception ex, bool fatal = false)
+        public static void Error(Exception ex)
         {
-            if (fatal)
-            {
-                CurrentCmdlet?.ThrowTerminatingException(ex);
-                return;
-            }
-            CurrentCmdlet?.ThrowException(ex);
+            using var ps = PowerShell.Create();
+            ps.AddCommand("Write-Error");
+            ps.AddParameter("Exception", ex);
+            ps.AddParameter("Message", ex.Message);
+            ps.Invoke();
         }
     }
 }

@@ -12,10 +12,14 @@
 [string]$global:PROJECT_FILE_NAME = "PSCerts.csproj"
 [string]$global:PROJECT_PATH = Join-Path $global:SLN_ROOT $global:MODULE_NAME
 [string]$global:PROJECT_FILE_PATH = Join-Path $global:PROJECT_PATH $global:PROJECT_FILE_NAME
+
 [string]$global:MODULE_FILE_NAME = "$global:MODULE_NAME.psm1"
-[string]$global:MODULE_PATH = Join-Path $global:TEST_PATH $global:MODULE_FILE_NAME
+[string]$global:TEST_MODULE_PATH = Join-Path $global:TEST_PATH $global:MODULE_FILE_NAME
+[string]$global:PUBLISH_MODULE_PATH = Join-Path $global:PUBLISH_PATH $global:MODULE_FILE_NAME
+
 [string]$global:MANIFEST_FILE_NAME = "$global:MODULE_NAME.psd1"
-[string]$global:MANIFEST_PATH = Join-Path $global:PUBLISH_PATH $global:MANIFEST_FILE_NAME
+[string]$global:TEST_MANIFEST_PATH = Join-Path $global:TEST_PATH $global:MANIFEST_FILE_NAME
+[string]$global:PUBLISH_MANIFEST_PATH = Join-Path $global:PUBLISH_PATH $global:MANIFEST_FILE_NAME
 
 [string]$global:VERSION_REGEX = "(ModuleVersion = )'(.*?)'"
 [string]$global:RELEASE_NOTES_REGEX = "(ReleaseNotes = )'(.*?)'"

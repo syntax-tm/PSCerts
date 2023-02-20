@@ -91,14 +91,7 @@ namespace PSCerts.Commands
             {
                 var cert = Certificate ?? CertHelper.FindCertificate(Thumbprint);
                 var privateKeyFile = PrivateKeyHelper.GetPrivateKey(cert);
-                var rule = ParameterSetName switch
-                {
-                    PROPS_PARAM_SET or
-                    HASH_PROPS_PARAM_SET       => new (Identity, FileSystemRights, AccessType),
-                    ACCESS_RULE_PARAM_SET or
-                    HASH_ACCESS_RULE_PARAM_SET => Rule,
-                    _                          => throw new ArgumentException($"Unknown {nameof(ParameterSetName)} {ParameterSetName}.")
-                };
+                var rule = Rule ?? new (Identity, FileSystemRights, AccessType);
                 
                 FileSystemHelper.AddAccessControl(privateKeyFile, rule);
             }

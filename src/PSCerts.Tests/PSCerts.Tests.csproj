@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net7.0-windows;net472</TargetFrameworks>
+    <TargetFrameworks>net462;net7.0-windows</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>preview</LangVersion>
     <IsPackable>false</IsPackable>
@@ -12,6 +12,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="PSCerts.Tests.csproj.DotSettings" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="JetBrains.DotMemoryUnit" Version="3.2.20220510" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3-beta1" />
     <PackageReference Include="NUnit" Version="3.13.3" />
@@ -30,9 +35,19 @@
     <PackageReference Include="System.IO.FileSystem.AccessControl" Version="6.0.0-preview.5.21301.5" />
     <PackageReference Include="System.IO.FileSystem.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Linq" Version="4.3.0" />
-    <PackageReference Include="System.Security.AccessControl" Version="6.0.0" />
+    <PackageReference Include="System.Security.AccessControl" Version="6.0.2-mauipre.1.22102.15" />
     <PackageReference Include="System.Security.Cryptography.Cng" Version="6.0.0-preview.4.21253.7" />
     <PackageReference Include="System.Security.Cryptography.X509Certificates" Version="4.3.2" />
+  </ItemGroup>
+
+  <!-- .NET Standard -->
+  <ItemGroup Condition="!$(TargetFramework.StartsWith('net7'))">
+    <!--<PackageReference Include="Microsoft.PowerShell.SDK" Version="7.3.2" />-->
+
+  </ItemGroup>
+
+  <!-- .NET Framework -->
+  <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
   </ItemGroup>
 
   <ItemGroup>

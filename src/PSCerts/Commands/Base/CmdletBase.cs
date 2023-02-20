@@ -3,13 +3,13 @@ using PSCerts.Util;
 
 namespace PSCerts.Commands
 {
-    public abstract class CmdletBase : PSCmdlet
+    public abstract class CmdletBase : Cmdlet
     {
-        protected override void BeginProcessing()
+        public void Execute()
         {
-            base.BeginProcessing();
-
-            PowerShellHelper.CurrentCmdlet = this;
+            BeginProcessing();
+            ProcessRecord();
+            EndProcessing();
         }
     }
 }

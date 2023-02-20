@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using PSCerts.Util;
@@ -38,7 +39,7 @@ namespace PSCerts.Tests
             
             var matches = store.Certificates.Find(X509FindType.FindByThumbprint, THUMBPRINT, false);
 
-            Console.WriteLine($"Removing {matches.Count} certs from {store}...");
+            Console.WriteLine($"Removing {matches.Count} certs from {store.Name}...");
 
             store.Certificates.RemoveRange(matches);
             
@@ -61,7 +62,7 @@ namespace PSCerts.Tests
             
             Console.WriteLine(THUMBPRINT);
             
-            Console.WriteLine($"Importing certificate with thumbprint '{THUMBPRINT}' into {store}...");
+            Console.WriteLine($"Importing certificate with thumbprint '{THUMBPRINT}' into {store.Name}...");
 
             store.Add(cert);
 
