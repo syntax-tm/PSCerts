@@ -6,7 +6,7 @@ using PSCerts.Util;
 
 namespace PSCerts.Commands
 {
-    [Cmdlet(VerbsData.Import, "CertConfig")]
+    [Cmdlet(VerbsData.Import, "Certs")]
     //[OutputType(typeof(List<CertSummary>))]
     public class ImportCertsCommand : CmdletBase
     {

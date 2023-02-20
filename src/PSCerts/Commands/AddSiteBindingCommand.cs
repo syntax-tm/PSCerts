@@ -29,7 +29,6 @@ namespace PSCerts.Commands
         public X509Certificate2 Certificate { get; set; }
 
         [Parameter(Mandatory = true, Position = 0, ParameterSetName = THUMBPRINT_PARAM_SET)]
-        [Alias("File", "Path")]
         [ValidateNotNullOrEmpty]
         public string Thumbprint { get; set; }
 
@@ -40,12 +39,10 @@ namespace PSCerts.Commands
         public string FilePath { get; set; }
 
         [Parameter(Mandatory = true, Position = 1, ParameterSetName = FROM_FILE_SET)]
-        [Alias("Pass")]
         [ValidateNotNullOrEmpty]
         public string Password { get; set; }
 
         [Parameter(Mandatory = true, Position = 1, ParameterSetName = FROM_FILE_SECURE_SET)]
-        [Alias("Password", "Pass")]
         [ValidateNotNull]
         public SecureString SecurePassword { get; set; }
 
@@ -57,10 +54,10 @@ namespace PSCerts.Commands
         [ValidateNotNullOrEmpty]
         public string Site { get; set; } = DEFAULT_SITE_NAME;
         
-        [Parameter(Position = 2, ParameterSetName = CERT_PARAM_SET, HelpMessage = BINDING_INFO_HELP)]
-        [Parameter(Position = 2, ParameterSetName = THUMBPRINT_PARAM_SET, HelpMessage = BINDING_INFO_HELP)]
-        [Parameter(Position = 3, ParameterSetName = FROM_FILE_SET, HelpMessage = BINDING_INFO_HELP)]
-        [Parameter(Position = 3, ParameterSetName = FROM_FILE_SECURE_SET, HelpMessage = BINDING_INFO_HELP)]
+        [Parameter(Position = 2, ParameterSetName = CERT_PARAM_SET)]
+        [Parameter(Position = 2, ParameterSetName = THUMBPRINT_PARAM_SET)]
+        [Parameter(Position = 3, ParameterSetName = FROM_FILE_SET)]
+        [Parameter(Position = 3, ParameterSetName = FROM_FILE_SECURE_SET)]
         [Alias("Binding","Info")]
         [ValidateNotNullOrEmpty]
         public string BindingInformation { get; set; } = DEFAULT_BINDING_INFO;

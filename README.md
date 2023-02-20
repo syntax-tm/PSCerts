@@ -26,7 +26,7 @@ Install-Module -Name PSCerts
 
 ## Build
 
-The `build.ps1` script will build and publish both the CLR (`net472`) and Core CLR (`netstandard2.0`) frameworks.
+The `build.ps1` script will build and publish both the CLR (`net462`) and Core CLR (`netstandard2.0`) frameworks.
 
 ```powershell
 .\src\scripts\build.ps1
@@ -53,9 +53,9 @@ Adds a [FileSystemAccessRule](https://learn.microsoft.com/en-us/dotnet/api/syste
 **Usage:**
 
 ```powershell
-Add-CertPermissions [-Certificate] <X509Certificate2> [-Identity] <string> [-FileSystemRights] <FileSystemRights> [-AccessType] <AccessControlType>
+Add-CertPermissions [-Certificate] <X509Certificate2> [-Identity] <string> [-FileSystemRights] <FileSystemRights> [[-AccessType] <AccessControlType>]
 Add-CertPermissions [-Certificate] <X509Certificate2> [-Rule] <FileSystemAccessRule>
-Add-CertPermissions [-Thumbprint] <string> [-Identity] <string> [-FileSystemRights] <FileSystemRights> [-AccessType] <AccessControlType>
+Add-CertPermissions [-Thumbprint] <string> [-Identity] <string> [-FileSystemRights] <FileSystemRights> [[-AccessType] <AccessControlType>]
 Add-CertPermissions [-Thumbprint] <string> [-Rule] <FileSystemAccessRule>
 ```
 
@@ -79,10 +79,10 @@ Adds or updates the SSL [Binding](https://learn.microsoft.com/en-us/dotnet/api/m
 **Usage:**
 
 ```powershell
-Add-SiteBinding [-Certificate] <X509Certificate2> [-Site] <string> [-BindingInformation] <string> [-SslFlags] <SslFlags>
-Add-SiteBinding [-Thumbprint] <string> [-Site] <string> [-BindingInformation] <string> [-SslFlags] <SslFlags>
-Add-SiteBinding [-FilePath] <string> [-Password] <string> [-Site] <string> [-BindingInformation] <string> [-SslFlags] <SslFlags>
-Add-SiteBinding [-FilePath] <string> [-SecurePassword] <SecureString> [-Site] <string> [-BindingInformation] <string> [-SslFlags] <SslFlags>
+Add-SiteBinding [-Certificate] <X509Certificate2> [-Site] <string> [[-BindingInformation] <string>] [[-SslFlags] <SslFlags>]
+Add-SiteBinding [-Thumbprint] <string> [-Site] <string> [[-BindingInformation] <string>] [[-SslFlags] <SslFlags>]
+Add-SiteBinding [-FilePath] <string> [-Password] <string> [-Site] <string> [[-BindingInformation] <string>] [[-SslFlags] <SslFlags>]
+Add-SiteBinding [-FilePath] <string> [-SecurePassword] <SecureString> [-Site] <string> [[-BindingInformation] <string>] [[-SslFlags] <SslFlags>]
 ```
 
 **Examples:**
