@@ -35,9 +35,9 @@ namespace PSCerts.Tests
             Assert.That(results, Is.Not.Null);
             Assert.That(results, Is.Not.Empty);
 
-            var exists = results.Any(r => r.Thumbprint.EqualsIgnoreCase(thumbprint));
+            var exists = results.FirstOrDefault(r => r.Thumbprint.EqualsIgnoreCase(thumbprint));
 
-            Assert.That(exists, Is.True);
+            Assert.That(exists, Is.Not.Null);
 
             Console.WriteLine($"{nameof(GetCertSummaryCommand)} contains {thumbprint}.");
 

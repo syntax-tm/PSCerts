@@ -24,25 +24,23 @@ A Powershell module for managing certificates.
 Install-Module -Name PSCerts
 ```
 
-## Build
+## TOC
 
-The `build.ps1` script will build and publish both the CLR (`net462`) and Core CLR (`netstandard2.0`) frameworks.
-
-```powershell
-.\src\scripts\build.ps1
-```
-
-Once that is done, the module and all required assemblies, type data, manifest, etc will be in the `src\publish` directory. If you are wanting to import the module you can use this directory but it's recommended to use the [Test](#test) script.
-
-## Test
-
-Because **PSCerts** is a binary module, importing the assembly from the build or publish directory will keep you from being able to buiild and/or deploy. Simply removing the module from the session with `Remove-Module` is **not** enough to remove the actual assembly reference. To get around this, `test.ps1` will run `build.ps1` and copy everything to `src\test`. You can load the assembly from the `test` path and still be able run build and publish.
-
-If you are developing in VSCode, which is recommnded, you can configure the PowerShell add-on to create a temporary console for each debugging session. This prevents locking the binary and the script will automatically re-import the module with each session.
-
-```json
-"powershell.debugging.createTemporaryIntegratedConsole": true
-```
+- [Install](#install)
+- [Commands](#commands)
+  - [Add-CertPermissions](#add-certpermissions)
+  - [Add-SiteBinding](#add-sitebinding)
+  - [Get-CertPermissions](#get-certpermissions)
+  - [Get-CertPrivateKey](#get-certprivatekey)
+  - [Get-CertSummary](#get-certsummary)
+  - [Set-CertFriendlyName](#set-certfriendlyname)
+- [Building](#building)
+- [Testing](#testing)
+  - [Unit Tests](#unit-tests)
+- [In-Progress](#in-progress)
+- [Backlog](#backlog)
+- [Reference](#reference)
+- [Additional Resources](#additional-resources)
 
 ## Commands
 
@@ -180,6 +178,32 @@ Set-CertFriendlyName -Thumbprint '10df834fc47ddfc4d069d2e4fe79e4bf1d6d4dae' -Fri
 ```
 
 **Returns:** [X509Certificate2](https://learn.microsoft.com/en-us/dotnet/api/system.security.cryptography.x509certificates.x509certificate2)
+
+---
+
+## Building
+
+The `build.ps1` script will build and publish both the CLR (`net462`) and Core CLR (`netstandard2.0`) frameworks.
+
+```powershell
+.\src\scripts\build.ps1
+```
+
+Once that is done, the module and all required assemblies, type data, manifest, etc will be in the `src\publish` directory. If you are wanting to import the module you can use this directory but it's recommended to use the [Test](#test) script.
+
+## Testing
+
+Because **PSCerts** is a binary module, importing the assembly from the build or publish directory will keep you from being able to buiild and/or deploy. Simply removing the module from the session with `Remove-Module` is **not** enough to remove the actual assembly reference. To get around this, `test.ps1` will run `build.ps1` and copy everything to `src\test`. You can load the assembly from the `test` path and still be able run build and publish.
+
+If you are developing in VSCode, which is recommnded, you can configure the PowerShell add-on to create a temporary console for each debugging session. This prevents locking the binary and the script will automatically re-import the module with each session.
+
+```json
+"powershell.debugging.createTemporaryIntegratedConsole": true
+```
+
+### Unit Tests
+
+`PSCerts.Tests` is the unit testing project. It's very much a work-in-progress.
 
 ---
 

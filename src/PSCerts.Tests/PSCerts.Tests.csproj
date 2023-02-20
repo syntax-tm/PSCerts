@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net462;net7.0-windows</TargetFrameworks>
+    <TargetFrameworks>net472;net7.0-windows</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>preview</LangVersion>
     <IsPackable>false</IsPackable>
@@ -9,6 +9,7 @@
     <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
     <WarningsAsErrors>$(WarningsAsErrors);NU1605</WarningsAsErrors>
     <NoWarn>1701;1702;NU1702</NoWarn>
+    <RuntimeIdentifiers>win10-x64</RuntimeIdentifiers>
   </PropertyGroup>
 
   <ItemGroup>
@@ -40,14 +41,10 @@
     <PackageReference Include="System.Security.Cryptography.X509Certificates" Version="4.3.2" />
   </ItemGroup>
 
-  <!-- .NET Standard -->
-  <ItemGroup Condition="!$(TargetFramework.StartsWith('net7'))">
-    <!--<PackageReference Include="Microsoft.PowerShell.SDK" Version="7.3.2" />-->
-
-  </ItemGroup>
-
-  <!-- .NET Framework -->
-  <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
+  <ItemGroup Condition="$(TargetFramework.StartsWith('net7'))">
+    <PackageReference Include="Microsoft.PowerShell.SDK" Version="6.1.1" /> 
+    <PackageReference Include="Microsoft.PowerShell.Commands.Diagnostics" Version="6.1.1" />
+    <PackageReference Include="Microsoft.WSMan.Management" Version="6.1.1" />
   </ItemGroup>
 
   <ItemGroup>
