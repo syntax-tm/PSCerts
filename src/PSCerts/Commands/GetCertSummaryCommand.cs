@@ -17,11 +17,15 @@ namespace PSCerts.Commands
     [OutputType(typeof(List<CertSummaryItem>))]
     public class GetCertSummaryCommand : CmdletBase
     {
+
+        [Parameter(Position = 0, HelpMessage = "Show only certificates with a private key.")]
+        public SwitchParameter WithPrivateKey { get; set; }
+
         protected override void ProcessRecord()
         {
             try
             {
-                var summary = CertHelper.GetCertSummary();
+                var summary = CertHelper.GetCertSummary(WithPrivateKey);
 
                 WriteObject(summary, true);
             }

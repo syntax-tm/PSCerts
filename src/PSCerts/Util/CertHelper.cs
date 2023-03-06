@@ -103,7 +103,7 @@ namespace PSCerts.Util
             //return certs.FirstOrDefault() ?? throw new KeyNotFoundException($"Unable to find a certificate with thumbprint '{thumbprint}'.");
         }
 
-        public static List<CertSummaryItem> GetCertSummary()
+        public static List<CertSummaryItem> GetCertSummary(bool hasPrivateKey = false)
         {
             var items = new List<CertSummaryItem>();
             var locations = new [] { StoreLocation.LocalMachine, StoreLocation.CurrentUser };
@@ -137,6 +137,11 @@ namespace PSCerts.Util
                                 summaryItem.Permissions = perms;
                             }
                             catch { }
+                        }
+
+                        if (hasPrivateKey && !summaryItem.HasPrivateKey)
+                        {
+                            continue;
                         }
 
                         items.Add(summaryItem);

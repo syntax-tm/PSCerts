@@ -85,12 +85,13 @@
                         <Label>Store</Label>
                     </TableColumnHeader>
                     <TableColumnHeader>
-                        <Label>Thumbprint</Label>
+                        <Label>Cert</Label>
                         <Width>41</Width>
                     </TableColumnHeader>
                     <TableColumnHeader>
                         <Label>Key</Label>
                         <Alignment>Center</Alignment>
+                        <Width>3</Width>
                     </TableColumnHeader>
                     <TableColumnHeader>
                         <Label>Permissions</Label>
@@ -105,14 +106,14 @@
                             </TableColumnItem>
                             <TableColumnItem>
                                 <ScriptBlock>
-                                    $output = "$($PSStyle.Foreground.BrightWhite)"
-                                    if ($_.DisplayName.Length -gt 41) {
-                                        $output += "$($_.DisplayName.Substring(0, 38))$($PSStyle.Foreground.BrightBlack)..."
+                                    $output = "$($PSStyle.Foreground.White)"
+                                    if ($_.DisplayName.Length -ge 41) {
+                                        $output += "$($_.DisplayName.Substring(0, 37))$($PSStyle.Foreground.BrightBlack)..."
                                     }
                                     else {
                                         $output += "$($_.DisplayName)"
                                     }
-                                    $output += "`n$($PSStyle.Foreground.White)$($_.Thumbprint)$($PSStyle.Reset)"
+                                    $output += "`n$($PSStyle.Foreground.Magenta)$($_.Thumbprint)$($PSStyle.Reset)"
                                     $output
                                 </ScriptBlock>
                             </TableColumnItem>

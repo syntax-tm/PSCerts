@@ -74,7 +74,7 @@ namespace PSCerts.Commands
         [Parameter(Mandatory = true, Position = 2, ParameterSetName = HASH_PROPS_PARAM_SET)]
         [Alias("Rights", "Permissions")]
         public FileSystemRights FileSystemRights { get; set; }
-        
+
         /// <summary>
         /// The <see cref="AccessControlType" /> of the new <see cref="FileSystemAccessRule"/>.
         /// </summary>
@@ -92,7 +92,7 @@ namespace PSCerts.Commands
                 var cert = Certificate ?? CertHelper.FindCertificate(Thumbprint);
                 var privateKeyFile = PrivateKeyHelper.GetPrivateKey(cert);
                 var rule = Rule ?? new (Identity, FileSystemRights, AccessType);
-                
+
                 FileSystemHelper.AddAccessControl(privateKeyFile, rule);
             }
             catch (Exception e)

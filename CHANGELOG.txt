@@ -1,3 +1,8 @@
+v0.0.22
+
+- Added ANSI support for Windows PowerShell
+- Added WithPrivateKey switch for Get-CertSummary
+
 v0.0.21
 
 - Cleaned up for release

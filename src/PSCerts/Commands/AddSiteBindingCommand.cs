@@ -53,7 +53,7 @@ namespace PSCerts.Commands
         [Alias("Name")]
         [ValidateNotNullOrEmpty]
         public string Site { get; set; } = DEFAULT_SITE_NAME;
-        
+
         [Parameter(Position = 2, ParameterSetName = CERT_PARAM_SET)]
         [Parameter(Position = 2, ParameterSetName = THUMBPRINT_PARAM_SET)]
         [Parameter(Position = 3, ParameterSetName = FROM_FILE_SET)]
@@ -61,7 +61,7 @@ namespace PSCerts.Commands
         [Alias("Binding","Info")]
         [ValidateNotNullOrEmpty]
         public string BindingInformation { get; set; } = DEFAULT_BINDING_INFO;
-        
+
         [Parameter(Position = 3, ParameterSetName = CERT_PARAM_SET)]
         [Parameter(Position = 3, ParameterSetName = THUMBPRINT_PARAM_SET)]
         [Parameter(Position = 4, ParameterSetName = FROM_FILE_SET)]
