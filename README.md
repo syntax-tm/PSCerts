@@ -147,13 +147,14 @@ Returns information about the currently installed certificates.
 **Usage:**
 
 ```powershell
-Get-CertSummary
+Get-CertSummary [-WithPrivateKey]
 ```
 
 **Examples:**
 
 ```powershell
 Get-CertSummary
+Get-CertSummary -WithPrivateKey
 ```
 
 **Returns:** [List\<CertSummaryItem>](/src/PSCerts/Models/Summary/CertSummaryItem.cs)

@@ -131,6 +131,8 @@
                                         | sort -Property Length -Descending `
                                         | select -First 1 -ExpandProperty Length
 
+                                    $maxLength = [Math]::Max($maxLength, 3)
+
                                     foreach ($perm in $_.Permissions)
                                     {
                                         if ($perm.IsAllow) {
