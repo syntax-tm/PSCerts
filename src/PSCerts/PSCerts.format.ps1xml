@@ -89,9 +89,6 @@
                         <Width>41</Width>
                     </TableColumnHeader>
                     <TableColumnHeader>
-                        <Label>Name</Label>
-                    </TableColumnHeader>
-                    <TableColumnHeader>
                         <Label>Key</Label>
                         <Alignment>Center</Alignment>
                     </TableColumnHeader>
@@ -107,10 +104,17 @@
                                 <ScriptBlock>"$($PSStyle.Foreground.BrightCyan)$($_.Location)$($PSStyle.Reset)\$($PSStyle.Foreground.BrightBlue)$($_.Store)$($PSStyle.Reset)"</ScriptBlock>
                             </TableColumnItem>
                             <TableColumnItem>
-                                <PropertyName>Thumbprint</PropertyName>
-                            </TableColumnItem>
-                            <TableColumnItem>
-                                <PropertyName>DisplayName</PropertyName>
+                                <ScriptBlock>
+                                    $output = "$($PSStyle.Foreground.BrightWhite)"
+                                    if ($_.DisplayName.Length -gt 41) {
+                                        $output += "$($_.DisplayName.Substring(0, 38))$($PSStyle.Foreground.BrightBlack)..."
+                                    }
+                                    else {
+                                        $output += "$($_.DisplayName)"
+                                    }
+                                    $output += "`n$($PSStyle.Foreground.White)$($_.Thumbprint)$($PSStyle.Reset)"
+                                    $output
+                                </ScriptBlock>
                             </TableColumnItem>
                             <TableColumnItem>
                                 <ScriptBlock>
