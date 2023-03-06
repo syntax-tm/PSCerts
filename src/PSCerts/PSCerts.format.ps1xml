@@ -12,7 +12,7 @@
                                 <CustomItem>
                                     <ExpressionBinding>
                                         <ScriptBlock>
-                                            "$($PSStyle.Formatting.TableHeader)$($PSStyle.Reverse)$($PSStyle.Bold)Store Location:  $($_.Location)  $($PSStyle.ReverseOff)$($PSStyle.Reset)"
+                                            "$($PSStyle.Formatting.TableHeader)$($PSStyle.Reverse)$($PSStyle.Bold)Store Location:  $($_.Location)$($PSStyle.ReverseOff)$($PSStyle.Reset)"
                                         </ScriptBlock>
                                     </ExpressionBinding>
                                     <NewLine/>

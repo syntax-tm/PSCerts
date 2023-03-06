@@ -1,3 +1,7 @@
+v0.0.23
+
+- Fixed formatting
+
 v0.0.22
 
 - Added ANSI support for Windows PowerShell
