@@ -5,19 +5,6 @@ namespace PSCerts.Util
 {
     public static class PowerShellHelper
     {
-        private static PowerShell _default;
-        public static PowerShell Default
-        {
-            get
-            {
-                if (_default != null) return _default;
-
-                _default = PowerShell.Create();
-
-                return _default;
-            }
-        }
-        
         public static void Debug(string message)
         {
             using var ps = PowerShell.Create();

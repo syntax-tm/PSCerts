@@ -9,7 +9,6 @@ namespace PSCerts.Util
 {
     public static class IISHelper
     {
-        
         private const string LOCAL_SERVICE = @"NT AUTHORITY\LOCAL SERVICE";
         private const string LOCAL_SYSTEM = @"NT AUTHORITY\SYSTEM";
         private const string NETWORK_SERVICE = @"NT AUTHORIT\NETWORK SERVICE";

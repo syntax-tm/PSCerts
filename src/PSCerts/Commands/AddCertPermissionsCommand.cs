@@ -38,7 +38,11 @@ namespace PSCerts.Commands
         [Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true, ParameterSetName = ACCESS_RULE_PARAM_SET)]
         [Alias("Cert")]
         public X509Certificate2 Certificate { get; set; }
-        
+
+        /// <summary>
+        /// The <see cref="X509Certificate2.Thumbprint" /> of the <see cref="X509Certificate2" />.
+        /// </summary>
+        /// <seealso cref="X509Certificate2.Thumbprint" />
         [Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true, ParameterSetName = HASH_PROPS_PARAM_SET)]
         [Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true, ParameterSetName = HASH_ACCESS_RULE_PARAM_SET)]
         [Alias("CertHash", "Hash")]

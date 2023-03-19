@@ -67,40 +67,6 @@ namespace PSCerts.Util
             var result = ps.Invoke<X509Certificate2>()?.FirstOrDefault();
 
             return result;
-
-            //var certs = new List<X509Certificate2>();
-            //var locations = new [] { StoreLocation.LocalMachine, StoreLocation.CurrentUser };
-            //var stores = Enum.GetValues(typeof(StoreName)).Cast<StoreName>();
-            //var certStores = from l in locations
-            //                 from s in stores
-            //                 select new { Location = l, Store = s };
-            //
-            //foreach (var certStore in certStores)
-            //{
-            //    try
-            //    {
-            //        using var store = new X509Store(certStore.Store, certStore.Location);
-            //        store.Open(OpenFlags.ReadOnly);
-            //
-            //        var results = store.Certificates.Find(X509FindType.FindByThumbprint, thumbprint, false);
-            //
-            //        if (results.Count == 0) continue;
-            //
-            //        var certResult = results[0];
-            //        if (certResult.HasPrivateKey)
-            //        {
-            //            return certResult;
-            //        }
-            //
-            //        certs.Add(certResult);
-            //    }
-            //    catch (Exception e)
-            //    {
-            //        PowerShellHelper.Error(e);
-            //    }
-            //}
-            //
-            //return certs.FirstOrDefault() ?? throw new KeyNotFoundException($"Unable to find a certificate with thumbprint '{thumbprint}'.");
         }
 
         public static List<CertSummaryItem> GetCertSummary(bool hasPrivateKey = false)

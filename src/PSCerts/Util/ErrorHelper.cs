@@ -66,8 +66,5 @@ namespace PSCerts.Util
             
             return new (exception, info.ErrorID, info.ErrorCategory, null);
         }
-
-        
-
     }
 }
