@@ -1,3 +1,7 @@
+v0.0.26
+
+- Fixed init not loading in Windows PowerShell
+
 v0.0.25
 
 - Updated Add-SiteBinding

@@ -1,5 +1,6 @@
 $moduleManifestName = "PSCerts.psd1"
 $formatFile = "PSCerts.format.ps1xml"
+$initScript = "init.ps1"
 $assemblyName = "PSCerts.dll"
 $assemblyPath = $null
 
@@ -11,6 +12,8 @@ else # Desktop
 {
     $assemblyPath = Join-Path $PSScriptRoot "clr\$assemblyName"
 }
+
+. "$PSScriptRoot\init.ps1"
 
 $manifestPath = Join-Path $PSScriptRoot $moduleManifestName
 $formatFilePath = Join-Path $PSScriptRoot $formatFile
