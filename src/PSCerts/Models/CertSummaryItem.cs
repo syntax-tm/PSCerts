@@ -6,7 +6,7 @@ using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
-namespace PSCerts.Summary
+namespace PSCerts
 {
     [DebuggerDisplay("{Subject} ({Thumbprint})")]
     public class CertSummaryItem
@@ -46,67 +46,33 @@ namespace PSCerts.Summary
             Location = location;
             Store = storeName.ToString();
         }
-
-        public string GetPermissionsAsText(bool multiLine = true)
-        {
-            if (Permissions == null) return string.Empty;
-
-            var perms = new List<string>();
-            foreach (var ar in Permissions)
-            {
-                perms.Add(ar.ToString());
-            }
-            var separator = multiLine ? Environment.NewLine : ", ";
-
-            return string.Join(separator, perms);
-        }
-
+        
         public override string ToString()
         {
             var sb = new StringBuilder();
             var store = $@"{Location}\{Store}";
 
-            if (store.Length > 30)
-            {
-                sb.Append(store.Substring(0, 27));
-                sb.Append("...");
-            }
-            else
-            {
-                sb.Append(store.PadRight(30));
-            }
-            
+            sb.Append(store.Truncate(30, true));
             sb.Append(" ");
+            sb.Append(DisplayName.Truncate(30, true));
+            
+            var pk = HasPrivateKey ? $"{Fg.BrightCyan}w/ Key{Style.Reset}" : string.Empty;
 
-            if (DisplayName.Length > 30)
-            {
-                sb.Append(DisplayName.Substring(0, 27));
-                sb.Append("...");
-            }
-            else
-            {
-                sb.Append(DisplayName.PadRight(30));
-            }
-            
-            sb.Append(" ");
-            
-            sb.Append(Thumbprint);
-            
-            sb.Append(" ");
-            
-            sb.Append(HasPrivateKey ? "w/ Key" : "      ");
+            sb.AppendFormat(" {0} {1,6}", Thumbprint, pk);
 
             if (Permissions != null && Permissions.Any())
             {
-                var maxRights = Permissions.Max(p => p.FileSystemRights.ToString().Length);
+                var maxRights = Permissions.Max(p => p.FileSystemRightsString.Length);
                 foreach (var permission in Permissions)
                 {
-                    var typeChar = permission.IsAllow ? "+" : "-";
-                    sb.Append("\n  ");
-                    sb.Append(typeChar);
-                    sb.Append(" ");
-                    sb.Append($"{permission.FileSystemRights.ToString().PadRight(maxRights + 1)}");
-                    sb.Append(permission.Identity);
+                    var ruleType = permission.IsAllow ? $"{Fg.Green} + " : $"{Fg.Red} - ";
+                    sb.AppendLine();
+                    sb.Append(ruleType);
+
+                    var format = @"{0," + maxRights + @"}";
+
+                    sb.AppendFormat(format, permission.FileSystemRightsString);
+                    sb.AppendFormat("{0} {1}", Style.Reset, permission.Identity);
                 }
             }
 

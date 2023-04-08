@@ -19,6 +19,10 @@ namespace PSCerts.Commands
         [ValidateNotNull]
         public X509Certificate2 Certificate { get; set; }
         
+        /// <summary>
+        /// The <see cref="X509Certificate2.Thumbprint" /> of the <see cref="X509Certificate2" />.
+        /// </summary>
+        /// <seealso cref="X509Certificate2.Thumbprint" />
         [Parameter(Mandatory = true,  Position = 0, ValueFromPipeline = true,
                    ValueFromPipelineByPropertyName = true, ParameterSetName = FIND_PARAM_SET)]
         [Alias("CertHash", "Hash")]

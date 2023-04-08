@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -30,16 +31,17 @@ namespace PSCerts.Util
             @"%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\RSA\MachineKeys", // Shared private
             @"%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\DSS\MachineKeys"  // Shared private
         };
-        private static List<string> _privateKeyStores;
+
+        private static List<string> _keyContainers;
         protected static List<string> KeyContainers
         {
             get
             {
-                if (_privateKeyStores != null) return _privateKeyStores;
+                if (_keyContainers != null) return _keyContainers;
 
-                _privateKeyStores = GetPrivateKeyStores();
+                _keyContainers = GetPrivateKeyStores();
 
-                return _privateKeyStores;
+                return _keyContainers;
             }
         }
 
@@ -146,7 +148,7 @@ namespace PSCerts.Util
                 }
                 catch (Exception e)
                 {
-                    PowerShellHelper.Debug($"{e}");
+                    PowerShellHelper.Debug($"An error occurred searching '{location}' for private key '{keyName}'. {e}");
                 }
             }
 
@@ -156,7 +158,9 @@ namespace PSCerts.Util
         private static List<string> GetPrivateKeyStores()
         {
             var currentUser = WindowsIdentity.GetCurrent();
-            var sid = currentUser.User.Value;
+            var sid = currentUser.User?.Value;
+
+            Debug.Assert(sid != null, $"Current {nameof(WindowsIdentity)} is null.");
 
             var stores = _privateKeyStoreFormats.Select(s => Environment.ExpandEnvironmentVariables(string.Format(s, sid)));
             return stores.ToList();

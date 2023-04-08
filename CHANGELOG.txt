@@ -1,5 +1,11 @@
 v0.0.25
 
+- Updated Add-SiteBinding
+- Updated Get-CertSummary
+- Added ANSI formatting to ToString overrides
+
+v0.0.25
+
 - Fixed formatting
 
 v0.0.24

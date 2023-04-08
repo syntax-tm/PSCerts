@@ -61,8 +61,6 @@ namespace PSCerts
         public Exception AsException()
         {
             if (IsValid) return null;
-
-            //var message = string.Format(@"Validation was not successful.{0}{0}Details:{0}{1}", Environment.NewLine, this);
             return new InvalidOperationException(ToString());
         }
 

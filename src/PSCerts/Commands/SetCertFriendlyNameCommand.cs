@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Management.Automation;
-using System.Security.AccessControl;
 using System.Security.Cryptography.X509Certificates;
 using PSCerts.Util;
 
@@ -27,12 +26,16 @@ namespace PSCerts.Commands
         private const string HASH_PARAM_SET = nameof(HASH_PARAM_SET);
         
         /// <summary>
-        /// The <see cref="X509Certificate2"/> with a private key to add permissions.
+        /// The <see cref="X509Certificate2"/> to update.
         /// </summary>
         [Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true, ParameterSetName = CERT_PARAM_SET)]
         [Alias("Cert")]
         public X509Certificate2 Certificate { get; set; }
         
+        /// <summary>
+        /// The <see cref="X509Certificate2.Thumbprint" /> of the <see cref="X509Certificate2" />.
+        /// </summary>
+        /// <seealso cref="X509Certificate2.Thumbprint" />
         [Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true, ParameterSetName = HASH_PARAM_SET)]
         [Alias("CertHash", "Hash")]
         [ValidateNotNullOrEmpty]

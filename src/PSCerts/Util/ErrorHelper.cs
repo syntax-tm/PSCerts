@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Common;
 using System.IO;
 using System.Management.Automation;
 using System.Security;
@@ -37,7 +36,7 @@ namespace PSCerts.Util
                     CryptographicException _      => ErrorCode.Permissions,
                     SecurityException _           => ErrorCode.Permissions,
                     UnauthorizedAccessException _ => ErrorCode.Permissions,
-                    JsonException     _           => ErrorCode.InvalidFormat,
+                    JsonException _               => ErrorCode.InvalidFormat,
                     _                             => ErrorCode.None
                 };
 

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Management.Automation;
 using System.Security.Cryptography.X509Certificates;
-using PSCerts.Summary;
 using PSCerts.Util;
 
 namespace PSCerts.Commands

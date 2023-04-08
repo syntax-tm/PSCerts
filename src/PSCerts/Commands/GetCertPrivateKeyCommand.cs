@@ -12,7 +12,10 @@ namespace PSCerts.Commands
     {
         private const string CERT_PARAM_SET = nameof(CERT_PARAM_SET);
         private const string FIND_PARAM_SET = nameof(FIND_PARAM_SET);
-
+        
+        /// <summary>
+        /// The <see cref="X509Certificate2"/> with an imported private key.
+        /// </summary>
         [Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true, 
                    ValueFromPipelineByPropertyName = true, ParameterSetName = CERT_PARAM_SET)]
         [Alias("Cert", "InputObject")]

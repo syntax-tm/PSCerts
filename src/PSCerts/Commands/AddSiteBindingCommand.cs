@@ -22,9 +22,10 @@ namespace PSCerts.Commands
         private const string HTTPS_PROTOCOL = @"https";
         private const string DEFAULT_BINDING_INFO = @"*:443:";
         private const string DEFAULT_SITE_NAME = @"Default Web Site";
-
-        private const string BINDING_INFO_HELP = "The IP address, port, and host name for the binding in a colon-delimited string (\"{IP}:{PORT}:{HOSTNAME}\").";
-
+        private const StoreLocation DEFAULT_STORE_LOCATION = StoreLocation.LocalMachine;
+        private const StoreName DEFAULT_STORE_NAME= StoreName.My;
+        private const X509KeyStorageFlags DEFAULT_STORAGE_FLAGS = X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable;
+        
         [Parameter(Mandatory = true, Position = 0, ValueFromPipeline = true, ParameterSetName = CERT_PARAM_SET)]
         public X509Certificate2 Certificate { get; set; }
 
@@ -58,7 +59,7 @@ namespace PSCerts.Commands
         [Parameter(Position = 2, ParameterSetName = THUMBPRINT_PARAM_SET)]
         [Parameter(Position = 3, ParameterSetName = FROM_FILE_SET)]
         [Parameter(Position = 3, ParameterSetName = FROM_FILE_SECURE_SET)]
-        [Alias("Binding","Info")]
+        [Alias("Binding", "Info")]
         [ValidateNotNullOrEmpty]
         public string BindingInformation { get; set; } = DEFAULT_BINDING_INFO;
 
@@ -89,11 +90,11 @@ namespace PSCerts.Commands
                     if (!File.Exists(FilePath)) throw new FileNotFoundException($"File '{FilePath}' does not exist.", FilePath);
                     if (!string.IsNullOrWhiteSpace(Password))
                     {
-                        cert = new (FilePath, Password, X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
+                        cert = new (FilePath, Password, DEFAULT_STORAGE_FLAGS);
                     }
                     else if (SecurePassword is not null)
                     {
-                        cert = new (FilePath, SecurePassword, X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
+                        cert = new (FilePath, SecurePassword, DEFAULT_STORAGE_FLAGS);
                     }
                 }
 
@@ -104,7 +105,7 @@ namespace PSCerts.Commands
 
                 var thumbprint = cert.Thumbprint ?? throw new InvalidOperationException($"{nameof(X509Certificate2)} {nameof(X509Certificate2.Thumbprint)} cannot be null.");
 
-                store = new (StoreName.My, StoreLocation.LocalMachine);
+                store = new (DEFAULT_STORE_NAME, DEFAULT_STORE_LOCATION);
                 store.Open(OpenFlags.ReadWrite | OpenFlags.OpenExistingOnly);
 
                 store.Add(cert);
@@ -142,8 +143,8 @@ namespace PSCerts.Commands
                     AppPool = appPool,
                     AppPoolIdentity = appPoolIdentity,
                     Certificate = cert,
-                    Location = StoreLocation.LocalMachine,
-                    StoreName = StoreName.My,
+                    Location = DEFAULT_STORE_LOCATION,
+                    StoreName = DEFAULT_STORE_NAME,
                     PrivateKeySecurity = acl,
                     Binding = binding
                 };

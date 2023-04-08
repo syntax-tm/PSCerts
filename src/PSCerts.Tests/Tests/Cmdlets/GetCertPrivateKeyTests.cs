@@ -1,78 +1,77 @@
-﻿namespace PSCerts.Tests
+﻿namespace PSCerts.Tests;
+
+internal class GetCertPrivateKeyTests : PSCertsTestBase
 {
-    internal class GetCertPrivateKeyTests : PSCertsTestBase
+    [Test]
+    public void Get_CertPrivateKey_NullCertificateThrowsException()
     {
-        [Test]
-        public void Get_CertPrivateKey_NullCertificateThrowsException()
+        var cmdlet = new GetCertPrivateKeyCommand
         {
-            var cmdlet = new GetCertPrivateKeyCommand
-            {
-                Certificate = null
-            };
+            Certificate = null
+        };
             
-            var result = cmdlet.GetErrors();
+        var result = cmdlet.GetErrors();
             
-            Assert.That(result, Is.Not.Null);
-            Assert.That(result, Is.Not.Empty);
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result, Is.Not.Empty);
 
-            Assert.Pass();
-        }
+        Assert.Pass();
+    }
         
-        [Test]
-        public void Get_CertPrivateKey_NullThumbprintThrowsException()
+    [Test]
+    public void Get_CertPrivateKey_NullThumbprintThrowsException()
+    {
+        var cmdlet = new GetCertPrivateKeyCommand
         {
-            var cmdlet = new GetCertPrivateKeyCommand
-            {
-                Thumbprint = null
-            };
+            Thumbprint = null
+        };
             
-            var result = cmdlet.GetErrors();
+        var result = cmdlet.GetErrors();
             
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result, Is.Not.Empty);
+
+        Assert.Pass();
+    }
+
+    [Test]
+    public void Get_CertPrivateKey_ByCertificateIsSuccessful()
+    {
+        var cmdlet = new GetCertPrivateKeyCommand
+        {
+            Certificate = Certs[0]
+        };
+            
+        var result = cmdlet.GetResult<FileInfo>();
+            
+        Assert.Multiple(() =>
+        {
             Assert.That(result, Is.Not.Null);
-            Assert.That(result, Is.Not.Empty);
+            Assert.That(result.HasOutput, Is.True);
+            Assert.That(result.Output, Has.Count.EqualTo(1));
+        });
 
-            Assert.Pass();
-        }
+        Assert.Pass();
+    }
 
-        [Test]
-        public void Get_CertPrivateKey_ByCertificateIsSuccessful()
+    [Test]
+    [TestCase(@"10df834fc47ddfc4d069d2e4fe79e4bf1d6d4dae")]
+    public void Get_CertPrivateKey_ByThumbprintIsSuccessful(string thumbprint)
+    {
+        var cmdlet = new GetCertPrivateKeyCommand
         {
-            var cmdlet = new GetCertPrivateKeyCommand
-            {
-                Certificate = Certs[0]
-            };
+            Thumbprint = thumbprint
+        };
             
-            var result = cmdlet.GetResult<FileInfo>();
+        var result = cmdlet.GetResult<FileInfo>();
             
-            Assert.Multiple(() =>
-            {
-                Assert.That(result, Is.Not.Null);
-                Assert.That(result.HasOutput, Is.True);
-                Assert.That(result.Output, Has.Count.EqualTo(1));
-            });
-
-            Assert.Pass();
-        }
-
-        [Test]
-        [TestCase(@"10df834fc47ddfc4d069d2e4fe79e4bf1d6d4dae")]
-        public void Get_CertPrivateKey_ByThumbprintIsSuccessful(string thumbprint)
+        Assert.Multiple(() =>
         {
-            var cmdlet = new GetCertPrivateKeyCommand
-            {
-                Thumbprint = thumbprint
-            };
-            
-            var result = cmdlet.GetResult<FileInfo>();
-            
-            Assert.Multiple(() =>
-            {
-                Assert.That(result, Is.Not.Null);
-                Assert.That(result.HasOutput, Is.True);
-                Assert.That(result.Output, Has.Count.EqualTo(1));
-            });
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.HasOutput, Is.True);
+            Assert.That(result.Output, Has.Count.EqualTo(1));
+        });
 
-            Assert.Pass();
-        }
+        Assert.Pass();
     }
 }

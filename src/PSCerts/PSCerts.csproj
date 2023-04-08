@@ -6,10 +6,10 @@
     <LangVersion>preview</LangVersion>
     <TargetFrameworks>net472;net462;netstandard2.0;net7.0-windows</TargetFrameworks>
     <Title>PSCerts</Title>
-    <Description>Powershell module for managing certificates</Description>
+    <Description>PowerShell module for managing certificates</Description>
     <PackageProjectUrl>https://github.com/syntax-tm/PSCerts</PackageProjectUrl>
     <RepositoryUrl>https://github.com/syntax-tm/PSCerts</RepositoryUrl>
-    <PackageTags>certs;key;private;rsa</PackageTags>
+    <PackageTags>certs;key;private;rsa;x509;certificates;acl;permissions</PackageTags>
     <SelfContained>true</SelfContained>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <Configurations>Debug;Release;UnitTests</Configurations>
@@ -44,14 +44,12 @@
   <ItemGroup>
     <PackageReference Include="JsonSubTypes" Version="2.0.1" />
     <PackageReference Include="Microsoft.Win32.Registry" Version="6.0.0-preview.5.21301.5" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3-beta1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="NUnit" Version="3.13.3" />
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="7.0.1" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="8.0.0-preview.2.23128.3" />
     <PackageReference Include="System.Linq" Version="4.3.0" />
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
-    <!-- ReSharper disable VulnerablePackage -->
     <PackageReference Include="Microsoft.Web.Administration" Version="11.1.0" />
-    <!-- ReSharper restore VulnerablePackage -->
     <PackageReference Include="PowerShellStandard.Library" Version="7.0.0-preview.1">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
@@ -60,16 +58,6 @@
     <PackageReference Include="System.IO.FileSystem.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Security.AccessControl" Version="6.0.2-mauipre.1.22102.15" />
     <PackageReference Include="System.Security.Cryptography.Cng" Version="6.0.0-preview.4.21253.7" />
-  </ItemGroup>
-
-  <!-- .NET Standard -->
-  <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard'))">
-
-  </ItemGroup>
-
-  <!-- .NET Framework -->
-  <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
-
   </ItemGroup>
 
   <ItemGroup>

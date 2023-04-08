@@ -1,20 +1,13 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Management.Automation;
-using System.Security;
-using System.Security.Principal;
-using PSCerts.Commands;
-using PSCerts.Util;
+using System.Text;
 
 namespace PSCerts
 {
-    public static class Extensions
+    public static class StringExtensions
     {
-
 #if CODE_ANALYSIS
         [SuppressMessage("ReSharper", "ConvertIfStatementToReturnStatement", Justification = "Readability")]
 #endif
@@ -36,18 +29,25 @@ namespace PSCerts
 
             return input.Equals(other, comparison);
         }
-        
-        public static List<T> AsList<T>(this ICollection collection)
-        {
-            return collection.Cast<T>().ToList();
-        }
-        
-        [SuppressMessage("ReSharper", "ConvertIfStatementToReturnStatement", Justification = "Readability")]
-        public static string GetAccountName(this SecurityIdentifier sid)
-        {
-            if (sid == null) throw new ArgumentNullException(nameof(sid));
 
-            return sid.Translate(typeof(NTAccount)).ToString();
+        public static string Truncate(this string source, int length, bool padRight = false, string overflowString = @"...")
+        {
+            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (string.IsNullOrEmpty(overflowString)) throw new ArgumentNullException(nameof(overflowString));
+
+            if (source.Length <= length)
+            {
+                return padRight
+                    ? source.PadRight(length, ' ')
+                    : source;
+            }
+
+            var overflowLength = overflowString.Length;
+
+            var sb = new StringBuilder();
+            sb.Append(source.Substring(0, length - overflowLength));
+            sb.Append(overflowString);
+            return sb.ToString();
         }
     }
 }
