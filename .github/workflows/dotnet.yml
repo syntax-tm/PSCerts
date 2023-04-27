@@ -5,9 +5,9 @@ name: .NET
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "feature/add-gh-workflow" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "feature/add-gh-workflow" ]
 
 jobs:
   build:
